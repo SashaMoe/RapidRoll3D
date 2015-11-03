@@ -7,6 +7,7 @@
 class WorldState
 {
 private:
+    float speed = 0.1;
 	float frameTimes[NUM_TRACKED_FRAMES];
 	float currentTime;
 	bool running;
@@ -25,6 +26,8 @@ private:
     glm::mat4 modelRotate;
     glm::mat4 modelIncrement;
     glm::mat4 modelTranslate;
+    glm::mat4 figureRotate;
+    glm::mat4 figureTranslate;
     glm::mat4 cameraMatrix;
 	
 	bool lightRotating;
@@ -39,8 +42,8 @@ public:
         shadingMode = 0;
 		running = true;
 		model = Model();
-        model.init("resources/cube.obj");
-		model2.init("resources/sphere.obj");
+        model.init("resources/sphere.obj");
+		model2.init("resources/BluePlane.obj");
 		glm::vec3 center = model.getCentroid();
 		glm::vec3 max = model.getMaxBound();
 		glm::vec3 min = model.getMinBound();
@@ -50,7 +53,7 @@ public:
 		printf("[%.2f %.2f %.2f] ", max[0], max[1], max[2]);
 		printf("= dim [%.2f %.2f %.2f]\n", dim[0], dim[1], dim[2]);
 		float camDistance = std::max(dim[0], dim[1]);
-		cameraPos = glm::vec3(0,max[1],camDistance*2);
+		cameraPos = glm::vec3(0,max[1],camDistance);
         cameraLook = glm::vec3(0,0,0);
         cameraUp = glm::vec3(0,1,0);
         
@@ -108,10 +111,6 @@ public:
 	{
 		float elapsed = t - this->currentTime;
 		this->updateFrameTime(elapsed);
-		
-        printf("123");
-        printf("lightPos : %f-%f-%f\n",lightPos.a,lightPos.b,lightPos.g);
-
         
 		//spin light
 		if(lightRotating)
@@ -132,6 +131,9 @@ public:
     
 	glm::mat4 getModelTranslate() const
 	{ return modelTranslate; }
+    
+    glm::mat4 getFigureTranslate() const
+    { return figureTranslate; }
     
     glm::mat4 getModelRotate() const
     { return modelRotate; }
@@ -162,6 +164,52 @@ public:
 	
 	void toggleLightRotate()
 	{ lightRotating = !lightRotating; }
+    
+    void moveUp()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), forwardVec*speed);
+        figureTranslate = trans * figureTranslate;
+        printf("before: %f | %f | %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        printf("after: %f | %f | %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void moveDown()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), -forwardVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void moveLeft()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), -rightVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void moveRight()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), rightVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
 };
 
 #endif

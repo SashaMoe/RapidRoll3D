@@ -111,6 +111,19 @@ private:
 			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 't'))
                 state.toggleLightRotate();
 		}
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
+            state.moveLeft();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
+            state.moveRight();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
+            state.moveUp();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
+            state.moveDown();
+        }
 	}
 	
 	void getWindowContext()
