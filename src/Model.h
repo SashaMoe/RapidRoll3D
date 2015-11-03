@@ -130,40 +130,43 @@ private:
 	
 	glm::vec3 computeMinBound()
 	{
-		glm::vec3 bound;
-		
-		for(int c=0; c<3; c++)
-			bound[c] = std::numeric_limits<float>::max();
-		
-		for(int i=0; i<positions.size(); i+=3)
-		{
-			for(int c=0; c<3; c++)
-			{
-				if(positions[i+c] < bound[c])
-					bound[c] = positions[i+c];
-			}
-		}
-		
-		return bound;
+//		glm::vec3 bound;
+//		
+//		for(int c=0; c<3; c++)
+//			bound[c] = std::numeric_limits<float>::max();
+//		
+//		for(int i=0; i<positions.size(); i+=3)
+//		{
+//			for(int c=0; c<3; c++)
+//			{
+//				if(positions[i+c] < bound[c])
+//					bound[c] = positions[i+c];
+//			}
+//		}
+//		
+//		return bound;
+        
+        return glm::vec3(-5,-5,-5);
 	}
 	
 	glm::vec3 computeMaxBound()
 	{
-		glm::vec3 bound;
-		
-		for(int c=0; c<3; c++)
-			bound[c] = -std::numeric_limits<float>::max();
-		
-		for(int i=0; i<positions.size(); i+=3)
-		{
-			for(int c=0; c<3; c++)
-			{
-				if(positions[i+c] > bound[c])
-					bound[c] = positions[i+c];
-			}
-		}
-		
-		return bound;
+//		glm::vec3 bound;
+//		
+//		for(int c=0; c<3; c++)
+//			bound[c] = -std::numeric_limits<float>::max();
+//		
+//		for(int i=0; i<positions.size(); i+=3)
+//		{
+//			for(int c=0; c<3; c++)
+//			{
+//				if(positions[i+c] > bound[c])
+//					bound[c] = positions[i+c];
+//			}
+//		}
+//		
+//		return bound;
+        return glm::vec3(5,5,5);
 	}
 	
 	glm::vec3 computeCentroid()

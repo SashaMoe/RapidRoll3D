@@ -338,7 +338,8 @@ private:
 		glm::mat4 Lp;
 		Lp = glm::perspective(1.0f, fov, _near, _far);
 		Lp = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 0.0f, 50.0f);
-
+        
+        
 		//hacky light source size change
 		GLfloat maxDis = state.getModel().getDimension()[2] * 3;
 		GLfloat distScale = 1.0f / (glm::length(Lr*lightPos - camPos) / maxDis);
