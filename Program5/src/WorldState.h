@@ -183,10 +183,6 @@ public:
         GLfloat x = (cameraLook-cameraPos).x;
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
-        
-        printf("look: %f | %f | %f \n", cameraLook.x, cameraLook.y, cameraLook.z);
-        printf("cam: %f | %f | %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
-        printf("for: %f | %f | %f \n", forwardVec.x, forwardVec.y, forwardVec.z);
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), forwardVec*speed);
         figureTranslate = trans * figureTranslate;
         cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
@@ -231,7 +227,6 @@ public:
         GLfloat camZ = (cameraLook-cameraPos).z;
         glm::vec3 rightVec = normalize(cross(glm::vec3(camX, 0, camZ), glm::vec3(0, 1, 0)));
         glm::mat4 rotH = glm::rotate(glm::mat4(1), (x-mousePosX)*mouseSensitive, glm::vec3(0,1,0));
-        printf("%f \n", (y-mousePosY)*mouseSensitive);
         glm::mat4 rotV = glm::rotate(glm::mat4(1), (y-mousePosY)*mouseSensitive, rightVec);
         
         glm::mat4 transToLook = glm::translate(glm::mat4(1.0f), -cameraLook);
