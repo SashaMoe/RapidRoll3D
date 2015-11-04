@@ -7,7 +7,8 @@
 class WorldState
 {
 private:
-    float speed = 0.1;
+    float speed = 0.1f;
+    float mouseSensitive = 0.01f;
 	float frameTimes[NUM_TRACKED_FRAMES];
 	float currentTime;
 	bool running;
@@ -29,6 +30,9 @@ private:
     glm::mat4 figureRotate;
     glm::mat4 figureTranslate;
     glm::mat4 cameraMatrix;
+    
+    int mousePosX;
+    int mousePosY;
 	
 	bool lightRotating;
 	bool modelRotating;
@@ -66,6 +70,12 @@ public:
         modelRotate = glm::mat4(1);
         modelIncrement = glm::rotate(glm::mat4(1), 0.02f, glm::vec3(0,1,0));
         modelTranslate = glm::translate(glm::mat4(1), -model.getCentroid());
+        
+        figureRotate = glm::mat4(1);
+        figureTranslate = glm::mat4(1);
+        
+        mousePosX = 256;
+        mousePosY = 256;
 		
 		lightRotating = false;
 		modelRotating = false;
@@ -138,6 +148,9 @@ public:
     glm::mat4 getModelRotate() const
     { return modelRotate; }
     
+    glm::mat4 getFigureRotate() const
+    { return figureRotate; }
+    
     glm::mat4 getLightRotate() const
     { return lightRotate; }
     
@@ -170,11 +183,13 @@ public:
         GLfloat x = (cameraLook-cameraPos).x;
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
+        
+        printf("look: %f | %f | %f \n", cameraLook.x, cameraLook.y, cameraLook.z);
+        printf("cam: %f | %f | %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
+        printf("for: %f | %f | %f \n", forwardVec.x, forwardVec.y, forwardVec.z);
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), forwardVec*speed);
         figureTranslate = trans * figureTranslate;
-        printf("before: %f | %f | %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
         cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
-        printf("after: %f | %f | %f \n", cameraPos.x, cameraPos.y, cameraPos.z);
         cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
     }
     
@@ -209,6 +224,26 @@ public:
         figureTranslate = trans * figureTranslate;
         cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
         cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void rotateCamera(int x, int y){
+        GLfloat camX = (cameraLook-cameraPos).x;
+        GLfloat camZ = (cameraLook-cameraPos).z;
+        glm::vec3 rightVec = normalize(cross(glm::vec3(camX, 0, camZ), glm::vec3(0, 1, 0)));
+        glm::mat4 rotH = glm::rotate(glm::mat4(1), (x-mousePosX)*mouseSensitive, glm::vec3(0,1,0));
+        printf("%f \n", (y-mousePosY)*mouseSensitive);
+        glm::mat4 rotV = glm::rotate(glm::mat4(1), (y-mousePosY)*mouseSensitive, rightVec);
+        
+        glm::mat4 transToLook = glm::translate(glm::mat4(1.0f), -cameraLook);
+        glm::mat4 transBack = glm::translate(glm::mat4(1.0f), cameraLook);
+        cameraPos = glm::vec3(transBack*rotH*rotV*transToLook*glm::vec4(cameraPos, 1));
+        figureRotate = rotH*figureRotate;
+        
+        // needs to stop if camera is 90 degrees to the ground
+        //cameraPos.z = std::max(0.1f, cameraPos.z);
+        
+        mousePosX = x;
+        mousePosY = y;
     }
 };
 

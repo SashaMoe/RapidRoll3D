@@ -98,6 +98,7 @@ public:
         glBindVertexArray(vertexArray);
         trans = glm::translate(glm::mat4(1), glm::vec3(0,0,0));
         trans = trans * state.getFigureTranslate();
+        trans = trans * state.getFigureRotate();
         glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
         glDrawElements(GL_TRIANGLES, state.getModel().getElements().size(), GL_UNSIGNED_INT, 0);
         checkGLError("model");
