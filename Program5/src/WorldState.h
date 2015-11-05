@@ -7,6 +7,8 @@
 class WorldState
 {
 private:
+    float speed = 0.1f;
+    float mouseSensitive = 0.01f;
 	float frameTimes[NUM_TRACKED_FRAMES];
 	float currentTime;
 	bool running;
@@ -25,7 +27,12 @@ private:
     glm::mat4 modelRotate;
     glm::mat4 modelIncrement;
     glm::mat4 modelTranslate;
+    glm::mat4 figureRotate;
+    glm::mat4 figureTranslate;
     glm::mat4 cameraMatrix;
+    
+    int mousePosX;
+    int mousePosY;
 	
 	bool lightRotating;
 	bool modelRotating;
@@ -39,8 +46,8 @@ public:
         shadingMode = 0;
 		running = true;
 		model = Model();
-        model.init("resources/cube.obj");
-		model2.init("resources/sphere.obj");
+        model.init("resources/sphere.obj");
+		model2.init("resources/BluePlane.obj");
 		glm::vec3 center = model.getCentroid();
 		glm::vec3 max = model.getMaxBound();
 		glm::vec3 min = model.getMinBound();
@@ -50,7 +57,7 @@ public:
 		printf("[%.2f %.2f %.2f] ", max[0], max[1], max[2]);
 		printf("= dim [%.2f %.2f %.2f]\n", dim[0], dim[1], dim[2]);
 		float camDistance = std::max(dim[0], dim[1]);
-		cameraPos = glm::vec3(0,max[1],camDistance*2);
+		cameraPos = glm::vec3(0,max[1],camDistance);
         cameraLook = glm::vec3(0,0,0);
         cameraUp = glm::vec3(0,1,0);
         
@@ -63,6 +70,12 @@ public:
         modelRotate = glm::mat4(1);
         modelIncrement = glm::rotate(glm::mat4(1), 0.02f, glm::vec3(0,1,0));
         modelTranslate = glm::translate(glm::mat4(1), -model.getCentroid());
+        
+        figureRotate = glm::mat4(1);
+        figureTranslate = glm::mat4(1);
+        
+        mousePosX = 256;
+        mousePosY = 256;
 		
 		lightRotating = false;
 		modelRotating = false;
@@ -108,10 +121,6 @@ public:
 	{
 		float elapsed = t - this->currentTime;
 		this->updateFrameTime(elapsed);
-		
-        printf("123");
-        printf("lightPos : %f-%f-%f\n",lightPos.a,lightPos.b,lightPos.g);
-
         
 		//spin light
 		if(lightRotating)
@@ -133,8 +142,14 @@ public:
 	glm::mat4 getModelTranslate() const
 	{ return modelTranslate; }
     
+    glm::mat4 getFigureTranslate() const
+    { return figureTranslate; }
+    
     glm::mat4 getModelRotate() const
     { return modelRotate; }
+    
+    glm::mat4 getFigureRotate() const
+    { return figureRotate; }
     
     glm::mat4 getLightRotate() const
     { return lightRotate; }
@@ -162,6 +177,69 @@ public:
 	
 	void toggleLightRotate()
 	{ lightRotating = !lightRotating; }
+    
+    void moveUp()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), forwardVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void moveDown()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), -forwardVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void moveLeft()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), -rightVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void moveRight()
+    {
+        GLfloat x = (cameraLook-cameraPos).x;
+        GLfloat z = (cameraLook-cameraPos).z;
+        glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), rightVec*speed);
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
+    void rotateCamera(int x, int y){
+        GLfloat camX = (cameraLook-cameraPos).x;
+        GLfloat camZ = (cameraLook-cameraPos).z;
+        glm::vec3 rightVec = normalize(cross(glm::vec3(camX, 0, camZ), glm::vec3(0, 1, 0)));
+        glm::mat4 rotH = glm::rotate(glm::mat4(1), (x-mousePosX)*mouseSensitive, glm::vec3(0,1,0));
+        glm::mat4 rotV = glm::rotate(glm::mat4(1), (y-mousePosY)*mouseSensitive, rightVec);
+        
+        glm::mat4 transToLook = glm::translate(glm::mat4(1.0f), -cameraLook);
+        glm::mat4 transBack = glm::translate(glm::mat4(1.0f), cameraLook);
+        cameraPos = glm::vec3(transBack*rotH*rotV*transToLook*glm::vec4(cameraPos, 1));
+        figureRotate = rotH*figureRotate;
+        
+        // needs to stop if camera is 90 degrees to the ground
+        //cameraPos.z = std::max(0.1f, cameraPos.z);
+        
+        mousePosX = x;
+        mousePosY = y;
+    }
 };
 
 #endif

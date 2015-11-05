@@ -48,7 +48,7 @@ public:
 		glm::vec3 dim = state.getModel().getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
 		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.01f, maxDim*10.0f);
-        C = state.getCameraMatrix();
+        
 		
 		setupShader();
 		setupBuffers(state.getModel());
@@ -65,8 +65,7 @@ public:
         glm::mat4 mT = state.getModelTranslate();
         glm::mat4 mR = state.getModelRotate();
         
-        
-		glm::mat4 M = C*mR*mT;
+		glm::mat4 M = state.getCameraMatrix()*mR*mT;
 		glm::mat4 N = glm::inverseTranspose(mR*mT);
         glm::vec4 lightPos = state.getLightPos();
         glm::vec4 camPos = state.getCameraPos();
@@ -97,13 +96,13 @@ public:
 		
 		//draw
         glBindVertexArray(vertexArray);
-        for(int i=-10;i<12;i+=3){
-            trans = glm::translate(glm::mat4(1), glm::vec3(i,0,0));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glDrawElements(GL_TRIANGLES, state.getModel().getElements().size(), GL_UNSIGNED_INT, 0);
-            checkGLError("model");
+        trans = glm::translate(glm::mat4(1), glm::vec3(0,0,0));
+        trans = trans * state.getFigureTranslate();
+        trans = trans * state.getFigureRotate();
+        glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+        glDrawElements(GL_TRIANGLES, state.getModel().getElements().size(), GL_UNSIGNED_INT, 0);
+        checkGLError("model");
 
-        }
         glBindVertexArray(0);
         glUseProgram(0);
 
@@ -111,20 +110,10 @@ public:
         
         glUseProgram(shaderProg);
         
-        for(int j = -10;j<12;j+=3){
-            trans = glm::translate(glm::mat4(1), glm::vec3(j,5,0));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glBindVertexArray(vertexArray2);
-            glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
-        }
-        
-        
-        for(int j = -10;j<12;j+=3){
-            trans = glm::translate(glm::mat4(1), glm::vec3(j,-5,0));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glBindVertexArray(vertexArray2);
-            glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
-        }
+        trans = glm::translate(glm::mat4(1), glm::vec3(0,-5,0));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+        glBindVertexArray(vertexArray2);
+        glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
         
         glBindVertexArray(0);
         glUseProgram(0);
