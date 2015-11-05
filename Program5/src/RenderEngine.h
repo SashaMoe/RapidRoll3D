@@ -106,25 +106,19 @@ public:
         }
         glBindVertexArray(0);
         glUseProgram(0);
-
-       
-        
+        glBindVertexArray(vertexArray2);
         glUseProgram(shaderProg);
         
-        for(int j = -10;j<12;j+=3){
-            trans = glm::translate(glm::mat4(1), glm::vec3(j,5,0));
+        for(int i=0;i<4;i++){
+            glm::vec3 vec = state.getPlanes()[i].getTrans();
+
+            trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*3,0,0));
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glBindVertexArray(vertexArray2);
             glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
         }
+       
         
         
-        for(int j = -10;j<12;j+=3){
-            trans = glm::translate(glm::mat4(1), glm::vec3(j,-5,0));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glBindVertexArray(vertexArray2);
-            glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
-        }
         
         glBindVertexArray(0);
         glUseProgram(0);

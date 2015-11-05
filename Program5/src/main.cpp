@@ -95,10 +95,10 @@ private:
 		
 		while (App->pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
-				state.setRunning(false);
-			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
-				state.setRunning(false);
+//			if (event.type == sf::Event::Closed)
+//				state.setRunning(false);
+//			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
+//				state.setRunning(false);
 			
             if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
                 state.setShadingMode(0);

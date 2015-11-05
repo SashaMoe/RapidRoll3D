@@ -1,8 +1,10 @@
 #ifndef __WORLDSTATE_H
 #define __WORLDSTATE_H
 #include "Model.h"
+#include "Plane.h"
 
 #define NUM_TRACKED_FRAMES 10
+#include "glm/gtc/type_ptr.hpp"
 
 class WorldState
 {
@@ -10,26 +12,41 @@ private:
 	float frameTimes[NUM_TRACKED_FRAMES];
 	float currentTime;
 	bool running;
+    
 	Model model;
-    int shadingMode;
     Model model2;
+    int shadingMode;
+    
+    Plane *plane = new Plane[4];
+    
     glm::vec3 cameraPos;
     glm::vec3 cameraLook;
     glm::vec3 cameraUp;
-    
     glm::vec4 lightPos;
     glm::vec3 lightIntensity;
-    
     glm::mat4 lightRotate;
     glm::mat4 lightIncrement;
     glm::mat4 modelRotate;
     glm::mat4 modelIncrement;
     glm::mat4 modelTranslate;
     glm::mat4 cameraMatrix;
-	
+    
+    
+
+    
+    
+    glm::mat4 planeTrans;
+    glm::mat4 heroTrans;
+    
 	bool lightRotating;
 	bool modelRotating;
 
+    
+    
+    
+    
+    
+    
 public:
 	WorldState()
 	{
@@ -56,16 +73,22 @@ public:
         
 		lightPos = glm::vec4((max-center)*1.3f, 1);
         lightIntensity = glm::vec3(1,1,1);
-        
         lightRotate = glm::mat4(1);
         lightIncrement = glm::rotate(glm::mat4(1), -0.05f, glm::vec3(0,1,0));
         
         modelRotate = glm::mat4(1);
         modelIncrement = glm::rotate(glm::mat4(1), 0.02f, glm::vec3(0,1,0));
         modelTranslate = glm::translate(glm::mat4(1), -model.getCentroid());
-		
-		lightRotating = false;
+        
+        
+        
+        lightRotating = false;
 		modelRotating = false;
+        
+        
+        
+        
+        
 	}
 	
 	void updateFrameTime(float timeAsSeconds)
@@ -121,6 +144,10 @@ public:
 		if(modelRotating)
 			modelRotate = modelIncrement * modelRotate;
 		
+        for(size_t i = 0 ;i<8;i++){
+            plane[i].timeStep();
+        }
+        
 		this->currentTime = t;
 	}
 	
@@ -132,6 +159,11 @@ public:
     
 	glm::mat4 getModelTranslate() const
 	{ return modelTranslate; }
+    
+    
+    Plane* getPlanes(){
+        return this->plane;
+    }
     
     glm::mat4 getModelRotate() const
     { return modelRotate; }

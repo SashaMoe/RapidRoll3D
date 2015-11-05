@@ -20,6 +20,7 @@
 /* Begin PBXFileReference section */
 		8113B9B21BE92B18007E85E9 /* simple2.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = simple2.frag; sourceTree = "<group>"; };
 		8113B9B31BE92B18007E85E9 /* simple2.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = simple2.vert; sourceTree = "<group>"; };
+		8113B9B61BEAF4D9007E85E9 /* Plane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Plane.h; sourceTree = "<group>"; };
 		AF0E3A7F1BC05DD900D0BE0D /* lightPos.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = lightPos.vert; sourceTree = "<group>"; };
 		AF0E3A821BC05DD900D0BE0D /* simple.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = simple.frag; sourceTree = "<group>"; };
 		AF0E3A831BC05DD900D0BE0D /* simple.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = simple.vert; sourceTree = "<group>"; };
@@ -351,6 +352,7 @@
 				AFE01D391BAA52FE00AE18A3 /* Model.h */,
 				AFE01D3A1BAA530B00AE18A3 /* RenderEngine.h */,
 				AF8B437F1B97FA77005AB0AE /* main.cpp */,
+				8113B9B61BEAF4D9007E85E9 /* Plane.h */,
 			);
 			path = src;
 			sourceTree = "<group>";

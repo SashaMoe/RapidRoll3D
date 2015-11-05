@@ -83,7 +83,7 @@ void main()
 
   
     
-    vec4 posActual = mR * mT * trans * pos;
+    vec4 posActual = mR * mT * trans *  pos;
     
     vec4 lpActual = L * lightPos;
     

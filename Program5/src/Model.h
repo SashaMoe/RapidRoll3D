@@ -224,7 +224,7 @@ private:
 	}
 	
 	glm::vec3 computeDimension()
-	{
+        {
 		glm::vec3 max = getMaxBound();
 		glm::vec3 min = getMinBound();
 		glm::vec3 dim = max - min;
