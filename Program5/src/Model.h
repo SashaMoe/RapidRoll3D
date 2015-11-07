@@ -85,7 +85,7 @@ public:
             vert[2] = colors[i+2];
             
             glm::vec3 n = glm::normalize(vert);
-            n = (n+1.0f) * 0.5f;
+            //n = (n+1.0f) * 0.5f;
             
             
             colors[i] = n[0];
@@ -168,6 +168,74 @@ public:
     glm::vec3 getDimension()
     { return dim; }
     
+    glm::vec3 getHighestPoint()
+    {
+        glm::vec3 point;
+        point.x = positions[0];
+        point.y = positions[1];
+        point.z = positions[2];
+        for(int i=0; i<positions.size(); i+=3)
+        {
+            for(int c=0; c<3; c++)
+            {
+                if(positions[i+1] > point.y){
+                    point.x = positions[i+0];
+                    point.y = positions[i+1];
+                    point.z = positions[i+2];
+                }
+            }
+        }
+        return point;
+    }
+    
+    glm::vec3 getLowestPoint()
+    {
+        glm::vec3 point;
+        point.x = positions[0];
+        point.y = positions[1];
+        point.z = positions[2];
+        for(int i=0; i<positions.size(); i+=3)
+        {
+            for(int c=0; c<3; c++)
+            {
+                if(positions[i+1] < point.y){
+                    point.x = positions[i+0];
+                    point.y = positions[i+1];
+                    point.z = positions[i+2];
+                }
+            }
+        }
+        return point;
+    }
+    
+    glm::vec4 getBound()
+    {
+        glm::vec4 bound;
+        bound.x = positions[0];
+        bound.y = positions[0];
+        bound.z = positions[2];
+        bound.w = positions[2];
+        for(int i=0; i<positions.size(); i+=3)
+        {
+            for(int c=0; c<3; c++)
+            {
+                if(positions[i] < bound.x){
+                    bound.x = positions[i];
+                }
+                if(positions[i] > bound.y){
+                    bound.y = positions[i];
+                }
+                if(positions[i+2] < bound.z){
+                    bound.z = positions[i+2];
+                }
+                if(positions[i+2] > bound.w){
+                    bound.w = positions[i+2];
+                }
+            }
+        }
+        return bound;
+    }
+    
 private:
 	
 	glm::vec3 computeMinBound()
@@ -230,7 +298,7 @@ private:
 		glm::vec3 dim = max - min;
 		return dim;
 	}
-	
+    
 	vector<GLfloat> positions;
 	vector<GLfloat> colors;
 	vector<GLuint> elements;

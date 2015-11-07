@@ -47,7 +47,7 @@ public:
         
 		glm::vec3 dim = state.getModel().getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
-		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.01f, maxDim*10.0f);
+		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.1f, maxDim*10.0f);
         
 		
 		setupShader();
@@ -110,7 +110,7 @@ public:
         
         glUseProgram(shaderProg);
         
-        trans = glm::translate(glm::mat4(1), glm::vec3(0,-5,0));
+        trans = state.getPlaneTranslate();
         glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
         glBindVertexArray(vertexArray2);
         glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
