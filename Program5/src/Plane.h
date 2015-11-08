@@ -13,7 +13,7 @@ public:
         transVec = glm::vec3(0,0,0);
         transStep = glm::vec3(0,0.1,0);
         translation = glm::translate(glm::mat4(1), transVec + location);
-    };
+    }
     
     
     void timeStep(){

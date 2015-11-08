@@ -52,7 +52,8 @@ public:
 		float lastFrame = c.restart().asSeconds();
 		float lastPrint = lastFrame;
 		float targetFrameTime = 1.0f/(float)TARGET_FPS;
-		
+        App->setMouseCursorVisible(false);
+        
 		while (state.isRunning())
 		{			
 			App->setActive();
@@ -100,17 +101,35 @@ private:
 //			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
 //				state.setRunning(false);
 			
-            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
-                state.setShadingMode(0);
-            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'w'))
-                state.setShadingMode(1);
-            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'e'))
-                state.setShadingMode(2);
-			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'r'))
-                state.toggleModelRotate();
-			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 't'))
-                state.toggleLightRotate();
+//            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
+//                state.setShadingMode(0);
+//            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'w'))
+//                state.setShadingMode(1);
+//            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'e'))
+//                state.setShadingMode(2);
+//			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'r'))
+//                state.toggleModelRotate();
+//			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 't'))
+//                state.toggleLightRotate();
+            
+            if(event.type == sf::Event::MouseMoved)
+            {
+                state.rotateCamera(event.mouseMove.x, event.mouseMove.y);
+            }
 		}
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)||sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
+            state.moveLeft();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)||sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
+            state.moveRight();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)||sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
+            state.moveUp();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)||sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
+            state.moveDown();
+        }
 	}
 	
 	void getWindowContext()

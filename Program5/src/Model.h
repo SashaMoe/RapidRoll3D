@@ -186,7 +186,7 @@ private:
 			}
 		}
 		
-        return glm::vec3(-5,-5,-5);
+        return glm::vec3(-30,-30,-30);
 	}
 	
 	glm::vec3 computeMaxBound()
@@ -205,7 +205,7 @@ private:
 			}
 		}
 		
-        return glm::vec3(5,5,5);
+        return glm::vec3(30,30,30);
 	}
 	
 	glm::vec3 computeCentroid()
