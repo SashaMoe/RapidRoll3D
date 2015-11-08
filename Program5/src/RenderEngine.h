@@ -47,13 +47,15 @@ public:
         
 		glm::vec3 dim = state.getModel().getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
-		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.01f, maxDim*10.0f);
+		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.1f, maxDim*10.0f);
         
 		
 		setupShader();
 		setupBuffers(state.getModel());
-        setupBuffers2(state.getModel2());
-    
+        setupBuffersBluePlane(state.getBluePlaneModel());
+        setupBuffersFigure(state.getFigureModel());
+        setupBuffersPointedPlane(state.getPointedPlaneModel());
+        setupBuffersShatterPlane(state.getShatterPlaneModel());
 	}
 
 	void display(WorldState & state)
@@ -105,24 +107,45 @@ public:
 
         glBindVertexArray(0);
         glUseProgram(0);
-        glBindVertexArray(vertexArray2);
+       
         glUseProgram(shaderProg);
-
+        
+        
+        
+         glBindVertexArray(vertexArrayBluePlane);
         for(int i=0;i<4;i++){
             glm::vec3 vec = state.getPlanes()[i].getTrans();
 
             trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*15,0,0));
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+        }
+        
+         glBindVertexArray(vertexArrayPointedPlane);
+        for(int i=0;i<4;i++){
+            glm::vec3 vec = state.getPointedPlanes()[i].getTrans();
+            
+            trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*15,0,15));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+            glDrawElements(GL_TRIANGLES, state.getPointedPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         }
        
+         glBindVertexArray(vertexArrayShatterPlane);
+        for(int i=0;i<4;i++){
+            glm::vec3 vec = state.getShatterPlanes()[i].getTrans();
+            
+            trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*15,0,-15));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+            glDrawElements(GL_TRIANGLES, state.getShatterPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+        }
         
         
 
-        trans = glm::translate(glm::mat4(1), glm::vec3(0,-5,0));
+        trans = state.getPlaneTranslate();
+
         glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-        glBindVertexArray(vertexArray2);
-        glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(vertexArrayBluePlane);
+        glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
         glUseProgram(0);
@@ -131,7 +154,7 @@ public:
 //        trans = glm::translate(glm::mat4(1), glm::vec3(0,0,0));
 //        
 //        glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-//        glBindVertexArray(vertexArray2);
+//        glBindVertexArray(vertexArrayBluePlane);
 //        glDrawElements(GL_TRIANGLES, state.getModel2().getElements().size(), GL_UNSIGNED_INT, 0);
 //        glBindVertexArray(0);
 //        glUseProgram(0);
@@ -170,8 +193,12 @@ private:
     GLuint lightProg;
 	GLuint vertexArray;
     GLuint lightArray;
-    GLuint vertexArray2;
-	glm::mat4 P;
+    GLuint vertexArrayBluePlane;
+    GLuint vertexArrayPointedPlane;
+    GLuint vertexArrayShatterPlane;
+    GLuint vertexArrayFigure;
+	
+    glm::mat4 P;
 	glm::mat4 C;
 	glm::mat4 M;
     glm::mat4 trans;
@@ -259,9 +286,127 @@ private:
 		checkGLError("shader");
 	}
 
-    void setupBuffers2(Model & model){
-        glGenVertexArrays(1, &vertexArray2);
-        glBindVertexArray(vertexArray2);
+    
+    
+    
+    
+    
+    
+    void setupBuffersFigure(ModelLoader & model){
+        glGenVertexArrays(1, &vertexArrayFigure);
+        glBindVertexArray(vertexArrayFigure);
+        
+        GLuint positionBuffer;
+        GLuint colorBuffer;
+        GLuint elementBuffer;
+        GLint colorSlot;
+        GLint positionSlot;
+        
+        //setup position buffer
+        glGenBuffers(1, &positionBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getPositionBytes(), &model.getPosition()[0], GL_STATIC_DRAW);
+        positionSlot = glGetAttribLocation(shaderProg, "pos");
+        glEnableVertexAttribArray(positionSlot);
+        glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // Do the same thing for the color data
+        glGenBuffers(1, &colorBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getColorBytes(), &model.getColor()[0], GL_STATIC_DRAW);
+        colorSlot =    glGetAttribLocation(shaderProg, "colorIn");
+        glEnableVertexAttribArray(colorSlot);
+        glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // now the elements
+        glGenBuffers(1, &elementBuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
+    }
+
+    
+    
+    
+    void setupBuffersShatterPlane(ModelLoader & model){
+        glGenVertexArrays(1, &vertexArrayShatterPlane);
+        glBindVertexArray(vertexArrayShatterPlane);
+        
+        GLuint positionBuffer;
+        GLuint colorBuffer;
+        GLuint elementBuffer;
+        GLint colorSlot;
+        GLint positionSlot;
+        
+        //setup position buffer
+        glGenBuffers(1, &positionBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getPositionBytes(), &model.getPosition()[0], GL_STATIC_DRAW);
+        positionSlot = glGetAttribLocation(shaderProg, "pos");
+        glEnableVertexAttribArray(positionSlot);
+        glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // Do the same thing for the color data
+        glGenBuffers(1, &colorBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getColorBytes(), &model.getColor()[0], GL_STATIC_DRAW);
+        colorSlot =    glGetAttribLocation(shaderProg, "colorIn");
+        glEnableVertexAttribArray(colorSlot);
+        glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // now the elements
+        glGenBuffers(1, &elementBuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
+    }
+
+    
+    
+    
+    
+    void setupBuffersPointedPlane(ModelLoader & model){
+        glGenVertexArrays(1, &vertexArrayPointedPlane);
+        glBindVertexArray(vertexArrayPointedPlane);
+        
+        GLuint positionBuffer;
+        GLuint colorBuffer;
+        GLuint elementBuffer;
+        GLint colorSlot;
+        GLint positionSlot;
+        
+        //setup position buffer
+        glGenBuffers(1, &positionBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getPositionBytes(), &model.getPosition()[0], GL_STATIC_DRAW);
+        positionSlot = glGetAttribLocation(shaderProg, "pos");
+        glEnableVertexAttribArray(positionSlot);
+        glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // Do the same thing for the color data
+        glGenBuffers(1, &colorBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getColorBytes(), &model.getColor()[0], GL_STATIC_DRAW);
+        colorSlot =    glGetAttribLocation(shaderProg, "colorIn");
+        glEnableVertexAttribArray(colorSlot);
+        glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // now the elements
+        glGenBuffers(1, &elementBuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
+    }
+
+    
+    
+    
+    void setupBuffersBluePlane(ModelLoader & model){
+        glGenVertexArrays(1, &vertexArrayBluePlane);
+        glBindVertexArray(vertexArrayBluePlane);
         
         GLuint positionBuffer;
         GLuint colorBuffer;

@@ -95,26 +95,33 @@ private:
 		sf::Event event;
 		
 		while (App->pollEvent(event))
-		{
-//			if (event.type == sf::Event::Closed)
-//				state.setRunning(false);
-//			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
-//				state.setRunning(false);
+
+        {
+			if (event.type == sf::Event::Closed)
+				state.setRunning(false);
+			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
+				state.setRunning(false);
+
 			
 //            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
 //                state.setShadingMode(0);
 //            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'w'))
 //                state.setShadingMode(1);
-//            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'e'))
-//                state.setShadingMode(2);
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'e'))
+                state.setShadingMode(2);
 //			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'r'))
 //                state.toggleModelRotate();
-//			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 't'))
-//                state.toggleLightRotate();
+			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 't'))
+                state.toggleLightRotate();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
+                state.toggleFigureDrop();
             
             if(event.type == sf::Event::MouseMoved)
             {
                 state.rotateCamera(event.mouseMove.x, event.mouseMove.y);
+                if (event.mouseMove.x!=256 || event.mouseMove.y!=256) {
+                    sf::Mouse::setPosition(sf::Vector2i(256,256), *App);
+                }
             }
 		}
         

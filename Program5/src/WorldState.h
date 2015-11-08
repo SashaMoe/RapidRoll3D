@@ -2,24 +2,53 @@
 #define __WORLDSTATE_H
 #include "Model.h"
 #include "Plane.h"
+#include "PointedPlane.h"
+#include "ShatterPlane.h"
+#include "ModelLoader.h"
+
 
 #define NUM_TRACKED_FRAMES 10
 #include "glm/gtc/type_ptr.hpp"
 
 class WorldState
 {
+    
+    
 private:
     float speed = 0.1f;
+    float acceleration = 9.8f;
     float mouseSensitive = 0.01f;
 	float frameTimes[NUM_TRACKED_FRAMES];
 	float currentTime;
 	bool running;
     
+    
 	Model model;
     Model model2;
-    int shadingMode;
+
+    ModelLoader figureModel;
+    ModelLoader bluePlaneModel;
+    ModelLoader pointedPlaneModel;
+    ModelLoader shatterPlaneModel;
     
-    Plane *plane = new Plane[4];
+    
+    
+    
+    
+    
+    
+    int shadingMode;
+    int bluePlaneCount = 4;
+    int pointedPlaneCount = 4;
+    int shatterPlaneCount = 4;
+    
+    Plane *plane = new Plane[bluePlaneCount];
+    PointedPlane *pointedPlane = new PointedPlane[pointedPlaneCount];
+    ShatterPlane *shatterPlane = new ShatterPlane[shatterPlaneCount];
+    
+    
+    
+    
     
     glm::vec3 cameraPos;
     glm::vec3 cameraLook;
@@ -31,8 +60,12 @@ private:
     glm::mat4 modelRotate;
     glm::mat4 modelIncrement;
     glm::mat4 modelTranslate;
+    
     glm::mat4 figureRotate;
     glm::mat4 figureTranslate;
+    
+    glm::mat4 planeTranslate;
+    
     glm::mat4 cameraMatrix;
     
 
@@ -46,10 +79,12 @@ private:
 
     int mousePosX;
     int mousePosY;
-	
 
-	bool lightRotating;
-	bool modelRotating;
+    bool lightRotating;
+    bool modelRotating;
+    bool figureDrop;
+    float dropV = 0;
+
 
     
     
@@ -68,6 +103,14 @@ public:
 		model = Model();
         model.init("resources/sphere.obj");
 		model2.init("resources/BluePlane.obj");
+        figureModel.init("resources/sphere.obj");
+        bluePlaneModel.init("resources/bluePlane.obj");
+        pointedPlaneModel.init("resources/PointedPlane.obj");
+        shatterPlaneModel.init("resources/ShatterPlane.obj");
+        
+        
+        
+        
 		glm::vec3 center = model.getCentroid();
 		glm::vec3 max = model.getMaxBound();
 		glm::vec3 min = model.getMinBound();
@@ -94,17 +137,17 @@ public:
         figureRotate = glm::mat4(1);
         figureTranslate = glm::mat4(1);
         
+        planeTranslate = glm::translate(glm::mat4(1), glm::vec3(0,-5,0));
+        
         mousePosX = 256;
         mousePosY = 256;
 		
 		lightRotating = false;
 
 		modelRotating = false;
-        
-        
-        
-        
-        
+
+        figureDrop = false;
+
 	}
 	
 	void updateFrameTime(float timeAsSeconds)
@@ -155,32 +198,146 @@ public:
         //spin model
 		if(modelRotating)
 			modelRotate = modelIncrement * modelRotate;
+        
+        // figure drop
+        if (figureDrop) {
+            dropFigure(std::max(elapsed, 0.0f));
+        }
 		
-        for(size_t i = 0 ;i<4;i++){
+        for(size_t i = 0 ;i<bluePlaneCount;i++){
             plane[i].timeStep();
+        }
+        for(size_t i = 0 ;i<pointedPlaneCount;i++){
+            pointedPlane[i].timeStep();
+        }
+        for(size_t i = 0 ;i<shatterPlaneCount;i++){
+            shatterPlane[i].timeStep();
         }
         
 		this->currentTime = t;
 	}
+    
+    void dropFigure(float t){
+        if (checkFigureReachPlane(t)) {
+            // stay on plane
+            stickToPlane();
+        }else{
+            // drop
+            float newDropV = dropV + t*9.8f;
+            float dis = (newDropV*newDropV-dropV*dropV)/(2*9.8f);
+            glm::mat4 trans = glm::translate(glm::mat4(1), glm::vec3(0, -dis, 0));
+            moveFigure(trans);
+            dropV = newDropV;
+            printf("drop\n");
+        }
+    }
+    
+    bool checkFigureReachPlane(float t){
+        float newDropV = dropV + t*acceleration;
+        float dis = (newDropV*newDropV-dropV*dropV)/(2*acceleration);
+        glm::mat4 trans = glm::translate(glm::mat4(1), glm::vec3(0, -dis, 0));
+        
+        glm::vec4 figureBound = model.getBound();
+        glm::vec4 planeBound = model2.getBound();
+        float figureXMin = figureBound.x + figureTranslate[3][0];
+        float figureXMax = figureBound.y + figureTranslate[3][0];
+        float figureZMin = figureBound.z + figureTranslate[3][2];
+        float figureZMax = figureBound.w + figureTranslate[3][2];
+        float planeXMin = planeBound.x + planeTranslate[3][0];
+        float planeXMax = planeBound.y + planeTranslate[3][0];
+        float planeZMin = planeBound.z + planeTranslate[3][2];
+        float planeZMax = planeBound.w + planeTranslate[3][2];
+        
+        if (figureXMin>planeXMax || figureXMax<planeXMin || figureZMin>planeZMax || figureZMax<planeZMin) {
+            return false;
+        }
+        
+        printf("%f %f %f %f, %f %f %f %f\n", figureXMin, figureXMax, figureZMin, figureZMax, planeXMin, planeXMax, planeZMin, planeZMax);
+        glm::vec3 figurePoint = model.getLowestPoint();
+        glm::vec3 planePoint = model2.getHighestPoint();
+        float figureY = figurePoint.y + trans[3][1] + figureTranslate[3][1];
+        float planeY = planePoint.y + planeTranslate[3][1];
+        //glm::vec3 translatedFigure = glm::vec3(trans * figureTranslate * glm::vec4(figurePoint, 1));
+        //glm::vec3 translatedPlane = glm::vec3(planeTranslate * glm::vec4(planePoint, 1));
+        
+        if (figureY<planeY) {
+            return true;
+        }
+        return false;
+    }
+    
+    void stickToPlane(){
+        glm::vec3 figurePoint = model.getLowestPoint();
+        glm::vec3 planePoint = model2.getHighestPoint();
+        glm::vec3 translatedFigure = glm::vec3(figureTranslate * glm::vec4(figurePoint, 1));
+        glm::vec3 translatedPlane = glm::vec3(planeTranslate * glm::vec4(planePoint, 1));
+        if (translatedFigure.y-translatedPlane.y>0.01) {
+            glm::mat4 trans = glm::translate(glm::mat4(1), glm::vec3(0,translatedFigure.y-translatedPlane.y,0));
+            moveFigure(trans);
+            dropV = 0;
+            printf("stop\n");
+        }
+        printf("%f\n", translatedFigure.y-translatedPlane.y);
+        printf("stick\n");
+    }
 	
 	Model & getModel()
 	{ return model; }
 	
-    Model & getModel2()
-    { return model2; }
+    
     
 	glm::mat4 getModelTranslate() const
 	{ return modelTranslate; }
     
 
     
+    
+    
+    /*
+     Get methods for Models
+     */
+    
+    ModelLoader & getBluePlaneModel()
+    { return bluePlaneModel; }
+    
+    ModelLoader & getPointedPlaneModel()
+    { return pointedPlaneModel; }
+    
+    ModelLoader & getShatterPlaneModel()
+    { return shatterPlaneModel; }
+    
+    ModelLoader & getFigureModel(){
+        return figureModel;
+    }
+    
+    /*
+     Get methods for plane arrays
+     */
     Plane* getPlanes(){
         return this->plane;
     }
 
+    PointedPlane* getPointedPlanes(){
+        return this->pointedPlane;
+    }
+    
+    ShatterPlane* getShatterPlanes(){
+        return this->shatterPlane;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     glm::mat4 getFigureTranslate() const
     { return figureTranslate; }
 
+    
+    glm::mat4 getPlaneTranslate() const
+    { return planeTranslate; }
     
     glm::mat4 getModelRotate() const
     { return modelRotate; }
@@ -215,15 +372,24 @@ public:
 	void toggleLightRotate()
 	{ lightRotating = !lightRotating; }
     
+    void toggleFigureDrop()
+    { figureDrop = !figureDrop; }
+    
+    
+    void moveFigure(glm::mat4 trans)
+    {
+        figureTranslate = trans * figureTranslate;
+        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
+        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+    }
+    
     void moveUp()
     {
         GLfloat x = (cameraLook-cameraPos).x;
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), forwardVec*speed);
-        figureTranslate = trans * figureTranslate;
-        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
-        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+        moveFigure(trans);
     }
     
     void moveDown()
@@ -232,9 +398,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), -forwardVec*speed);
-        figureTranslate = trans * figureTranslate;
-        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
-        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+        moveFigure(trans);
     }
     
     void moveLeft()
@@ -243,9 +407,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), -rightVec*speed);
-        figureTranslate = trans * figureTranslate;
-        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
-        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+        moveFigure(trans);
     }
     
     void moveRight()
@@ -254,9 +416,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), rightVec*speed);
-        figureTranslate = trans * figureTranslate;
-        cameraPos = glm::vec3(trans * glm::vec4(cameraPos, 1));
-        cameraLook = glm::vec3(trans * glm::vec4(cameraLook, 1));
+        moveFigure(trans);
     }
     
     void rotateCamera(int x, int y){
@@ -264,18 +424,24 @@ public:
         GLfloat camZ = (cameraLook-cameraPos).z;
         glm::vec3 rightVec = normalize(cross(glm::vec3(camX, 0, camZ), glm::vec3(0, 1, 0)));
         glm::mat4 rotH = glm::rotate(glm::mat4(1), (x-mousePosX)*mouseSensitive, glm::vec3(0,1,0));
+        
         glm::mat4 rotV = glm::rotate(glm::mat4(1), (y-mousePosY)*mouseSensitive, rightVec);
         
         glm::mat4 transToLook = glm::translate(glm::mat4(1.0f), -cameraLook);
         glm::mat4 transBack = glm::translate(glm::mat4(1.0f), cameraLook);
+        
         cameraPos = glm::vec3(transBack*rotH*rotV*transToLook*glm::vec4(cameraPos, 1));
+        
+        float angle = abs(dot(normalize(cameraLook-cameraPos), cameraUp));
+        if (angle>0.99) {
+            glm::mat4 rotBack = glm::rotate(glm::mat4(1), -(y-mousePosY)*mouseSensitive, rightVec);
+            cameraPos = glm::vec3(transBack*rotH*rotBack*transToLook*glm::vec4(cameraPos, 1));
+        }
+        
         figureRotate = rotH*figureRotate;
         
-        // needs to stop if camera is 90 degrees to the ground
-        //cameraPos.z = std::max(0.1f, cameraPos.z);
-        
-        mousePosX = x;
-        mousePosY = y;
+        mousePosX = 256;
+        mousePosY = 256;
     }
 };
 
