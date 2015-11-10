@@ -18,15 +18,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8113B9B21BE92B18007E85E9 /* simple2.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = simple2.frag; sourceTree = "<group>"; };
-		8113B9B31BE92B18007E85E9 /* simple2.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = simple2.vert; sourceTree = "<group>"; };
 		8113B9B61BEAF4D9007E85E9 /* Plane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Plane.h; sourceTree = "<group>"; };
 		81BEF2B81BEED12D008E1A7A /* PointedPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointedPlane.h; sourceTree = "<group>"; };
 		81BEF2BA1BEED158008E1A7A /* ShatterPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShatterPlane.h; sourceTree = "<group>"; };
 		81BEF2BB1BEED351008E1A7A /* Figure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Figure.h; sourceTree = "<group>"; };
 		81BEF2BC1BEEE06A008E1A7A /* ModelLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelLoader.h; sourceTree = "<group>"; };
-		81EC55771BF18FC9002A5F8F /* texture.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = texture.vert; sourceTree = "<group>"; };
-		81EC55781BF18FCD002A5F8F /* texture.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = texture.frag; sourceTree = "<group>"; };
 		AF0E3A7F1BC05DD900D0BE0D /* lightPos.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = lightPos.vert; sourceTree = "<group>"; };
 		AF0E3A821BC05DD900D0BE0D /* simple.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = simple.frag; sourceTree = "<group>"; };
 		AF0E3A831BC05DD900D0BE0D /* simple.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = simple.vert; sourceTree = "<group>"; };
@@ -323,10 +319,6 @@
 		AF0E3A7A1BC05DD900D0BE0D /* resources */ = {
 			isa = PBXGroup;
 			children = (
-				81EC55771BF18FC9002A5F8F /* texture.vert */,
-				81EC55781BF18FCD002A5F8F /* texture.frag */,
-				8113B9B21BE92B18007E85E9 /* simple2.frag */,
-				8113B9B31BE92B18007E85E9 /* simple2.vert */,
 				AF0E3A7F1BC05DD900D0BE0D /* lightPos.vert */,
 				AF0E3A821BC05DD900D0BE0D /* simple.frag */,
 				AF0E3A831BC05DD900D0BE0D /* simple.vert */,
@@ -901,6 +893,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = SFMLApp;
+				SFML_GRAPHICS = "$(SFML_LINK_PREFIX) sfml-graphics$(SFML_LINK_SUFFIX)";
 			};
 			name = Debug;
 		};
@@ -908,6 +901,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = SFMLApp;
+				SFML_GRAPHICS = "$(SFML_LINK_PREFIX) sfml-graphics$(SFML_LINK_SUFFIX)";
 			};
 			name = Release;
 		};
