@@ -25,8 +25,9 @@ public:
         
         for(size_t i=0; i<loader.faceCount; i++) {
             if(loader.faceList[i]->vertex_count != 3) {
-                fprintf(stderr, "Only triangle primitives are supported.\n");
-                exit(1);
+                fprintf(stderr, "Skipping non-triangle face %zu.\n", i);
+                continue;
+                //exit(1);
             }
             
             elements.push_back(loader.faceList[i]->vertex_index[0]);
@@ -35,88 +36,52 @@ public:
             //printf("f%zu: %i %i %i\n", i, elements[i*3+0], elements[i*3+1], elements[i*3+2]);
         }
         
-        for(size_t i=0; i<positions.size(); i++) {
-            colors.push_back( 1 );
-            colors.push_back( 1 );
-            colors.push_back( 1 );
-        }
+        
+        vector<glm::vec3> vertexNormals;
+        vertexNormals.resize(positions.size());
+        for(size_t i=0; i<vertexNormals.size(); i++)
+            vertexNormals[i] = glm::vec3(0.0f);
+        
         
         //TODO compute the vertex normals by averaging the face normals
-        vector<glm::vec3> faceNormals;
-        
-        for(int i =0;i<elements.size()*3;i++){
-            colors[i] = 0;
-        }
-        
-        
-        
-        for(int i = 0 ; i < elements.size(); i += 3 ){
-            glm::vec3 vertices[3];
-            for(size_t v=0;v<3;v++){
-                for(size_t c=0;c<3;c++){
-                    size_t vertexId = elements[i+v];
-                    vertices[v][c] = positions[vertexId*3+c];
-                }
+        for(size_t i=0; i<elements.size(); i+=3) {
+            size_t vertexId[3];
+            glm::vec3 vertexPos[3];
+            
+            for(size_t v=0; v<3; v++)
+                vertexId[v] = elements[i+v];
+            
+            for(size_t v=0; v<3; v++)
+            {
+                vertexPos[v][0] = positions[ vertexId[v]*3 + 0 ];
+                vertexPos[v][1] = positions[ vertexId[v]*3 + 1 ];
+                vertexPos[v][2] = positions[ vertexId[v]*3 + 2 ];
             }
-            glm::vec3 a = vertices[1] - vertices[0];
-            glm::vec3 b = vertices[2] - vertices[1];
-            glm::vec3 n = glm::cross(a,b);
+            //printf("\nf%lu \n", i/3);
+            //for(size_t v=0; v<3; v++)
+            //    printf("%zu %.2f %.2f %.2f\n", vertexId[v], vertexPos[v][0], vertexPos[v][1], vertexPos[v][2]);
             
+            glm::vec3 a = vertexPos[1] - vertexPos[0];
+            glm::vec3 b = vertexPos[2] - vertexPos[1];
+            //printf("%.2f %.2f %.2f X %.2f %.2f %.2f\n", a[0], a[1], a[2], b[0], b[1], b[2]);
+            glm::vec3 faceNormal = glm::normalize(glm::cross(a, b));
             
-            
-            for (size_t v=0;v<3;v++){
-                colors[elements[i+v]*3 + 0 ] += n[0];
-                colors[elements[i+v]*3 + 1 ] += n[1];
-                colors[elements[i+v]*3 + 2 ] += n[2];
+            for(size_t v=0; v<3; v++) {
+                vertexNormals[ vertexId[v] ] += faceNormal;
+                //printf("%zu %.2f %.2f %.2f\n", vertexId[v], faceNormal[0], faceNormal[1], faceNormal[2]);
             }
         }
         
-        
-        for (int i = 0; i < elements.size() * 3 ; i += 3){
-            glm::vec3  vert = glm::vec3(1.0f);
-            vert[0] = colors[i];
-            vert[1] = colors[i+1];
-            vert[2] = colors[i+2];
-            glm::vec3 n = glm::normalize(vert);
-            colors[i] = n[0];
-            colors[i+1] = n[1];
-            colors[i+2] = n[2];
+        for(size_t i=0; i<positions.size(); i++) {
+            vertexNormals[i] = glm::normalize(vertexNormals[i]);
+            //printf("%.2f %.2f %.2f\n", vertexNormals[i][0], vertexNormals[i][1], vertexNormals[i][2]);
         }
         
-        
-        
-        //        for (size_t i=0;i<elements.size();i+=3){
-        //            glm::vec3 vertices[3];
-        //            for(size_t v=0;v<3;v++){
-        //                for(size_t c=0;c<3;c++){
-        //                    size_t vertexId = elements[i+v];
-        //                    vertices[v][c] = positions[vertexId*3+c];
-        //                }
-        //            }
-        //            glm::vec3 a = vertices[1] - vertices[0];
-        //            glm::vec3 b = vertices[2] - vertices[1];
-        //            glm::vec3 n = glm::normalize(glm::cross(a,b));
-        //
-        //
-        //
-        //
-        //            n = (n+1.0f) * 0.5f;
-        //            for (size_t v=0;v<3;v++){
-        //                colors[elements[i+v]*3 + 0 ] = n[0];
-        //                colors[elements[i+v]*3 + 1 ] = n[1];
-        //                colors[elements[i+v]*3 + 2 ] = n[2];
-        //            }
-        //
-        //        }
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        for(size_t i=0; i<positions.size(); i++) {
+            colors.push_back( (vertexNormals[i][0] + 1.0f) * 0.5f);
+            colors.push_back( (vertexNormals[i][1] + 1.0f) * 0.5f);
+            colors.push_back( (vertexNormals[i][2] + 1.0f) * 0.5f);
+        }
 
     }
     

@@ -2,7 +2,7 @@
 #define printusers() printf("Program by David Caggiano + Tianjiao Mo\n");
 
 #define _CRT_SECURE_NO_WARNINGS
-#define RESOLUTION 512
+#define RESOLUTION 1024
 #define TARGET_FPS 30                // controls spin update rate
 #define TIME_BETWEEN_UPDATES 0.015   // seconds between motion updates
 #define PRINT_FPS_INTERVAL 10.0f

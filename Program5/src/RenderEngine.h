@@ -51,7 +51,7 @@ public:
         
 		
 		setupShader();
-		setupBuffers(state.getModel());
+		//setupBuffers(state.getModel());
         setupBuffersBluePlane(state.getBluePlaneModel());
         setupBuffersFigure(state.getFigureModel());
         setupBuffersPointedPlane(state.getPointedPlaneModel());
@@ -96,13 +96,11 @@ public:
         glUniform4fv(glGetUniformLocation(shaderProg, "camPos"), 1, &camPos[0]);
         glUniform1i(glGetUniformLocation(shaderProg, "shadingMode"), state.getShadingMode());
 		
-		//draw
-        glBindVertexArray(vertexArray);
-        trans = glm::translate(glm::mat4(1), glm::vec3(0,0,0));
-        trans = trans * state.getFigureTranslate();
-        trans = trans * state.getFigureRotate();
+		//draw figure
+        glBindVertexArray(vertexArrayFigure);
+        trans = state.getFigure().getTranslation();
         glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-        glDrawElements(GL_TRIANGLES, state.getModel().getElements().size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, state.getFigureModel().getElements().size(), GL_UNSIGNED_INT, 0);
         checkGLError("model");
 
         glBindVertexArray(0);
@@ -111,41 +109,37 @@ public:
         glUseProgram(shaderProg);
         
         
-        
+        //draw blue plane
          glBindVertexArray(vertexArrayBluePlane);
         for(int i=0;i<4;i++){
-            glm::vec3 vec = state.getPlanes()[i].getTrans();
-
-            trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*15,0,0));
+            trans = state.getPlanes()[i].getTranslation();
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
             glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         }
         
+        //draw pointed plane
          glBindVertexArray(vertexArrayPointedPlane);
         for(int i=0;i<4;i++){
-            glm::vec3 vec = state.getPointedPlanes()[i].getTrans();
-            
-            trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*15,0,15));
+            trans = state.getPointedPlanes()[i].getTranslation();
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
             glDrawElements(GL_TRIANGLES, state.getPointedPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         }
        
+        //draw shatter plane
          glBindVertexArray(vertexArrayShatterPlane);
         for(int i=0;i<4;i++){
-            glm::vec3 vec = state.getShatterPlanes()[i].getTrans();
-            
-            trans = glm::translate(glm::mat4(1), vec+glm::vec3(i*15,0,-15));
+            trans = state.getShatterPlanes()[i].getTranslation();
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
             glDrawElements(GL_TRIANGLES, state.getShatterPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         }
         
         
-
-        trans = state.getPlaneTranslate();
-
-        glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-        glBindVertexArray(vertexArrayBluePlane);
-        glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+//
+//        trans = state.getPlaneTranslate();
+//
+//        glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+//        glBindVertexArray(vertexArrayBluePlane);
+//        glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
         glUseProgram(0);
@@ -161,29 +155,29 @@ public:
 
         
         
-        glUseProgram(lightProg);
-        
-        
-        glUniformMatrix4fv(glGetUniformLocation(lightProg, "P"), 1, GL_FALSE, &P[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(lightProg, "C"), 1, GL_FALSE, &C[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mR"), 1, GL_FALSE, &mR[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mT"), 1, GL_FALSE, &mT[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(lightProg, "M"), 1, GL_FALSE, &M[0][0]);
-		glUniformMatrix4fv(glGetUniformLocation(lightProg, "N"), 1, GL_FALSE, &N[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(lightProg, "L"), 1, GL_FALSE, &L[0][0]);
-        
-        
-        glUniform4fv(glGetUniformLocation(lightProg, "lightPos"), 1, &lightPos[0]);
-        
-        
-        glUniform4fv(glGetUniformLocation(lightProg, "camPos"), 1, &camPos[0]);
-        glUniform1i(glGetUniformLocation(lightProg, "shadingMode"), state.getShadingMode());
-        
-        glBindVertexArray(lightArray);
-        glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-        glUseProgram(0);
-        checkGLError("light");
+//        glUseProgram(lightProg);
+//        
+//        
+//        glUniformMatrix4fv(glGetUniformLocation(lightProg, "P"), 1, GL_FALSE, &P[0][0]);
+//        glUniformMatrix4fv(glGetUniformLocation(lightProg, "C"), 1, GL_FALSE, &C[0][0]);
+//        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mR"), 1, GL_FALSE, &mR[0][0]);
+//        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mT"), 1, GL_FALSE, &mT[0][0]);
+//		glUniformMatrix4fv(glGetUniformLocation(lightProg, "M"), 1, GL_FALSE, &M[0][0]);
+//		glUniformMatrix4fv(glGetUniformLocation(lightProg, "N"), 1, GL_FALSE, &N[0][0]);
+//        glUniformMatrix4fv(glGetUniformLocation(lightProg, "L"), 1, GL_FALSE, &L[0][0]);
+//        
+//        
+//        glUniform4fv(glGetUniformLocation(lightProg, "lightPos"), 1, &lightPos[0]);
+//        
+//        
+//        glUniform4fv(glGetUniformLocation(lightProg, "camPos"), 1, &camPos[0]);
+//        glUniform1i(glGetUniformLocation(lightProg, "shadingMode"), state.getShadingMode());
+//        
+//        glBindVertexArray(lightArray);
+//        glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
+//        glBindVertexArray(0);
+//        glUseProgram(0);
+//        checkGLError("light");
 	}
 
 
