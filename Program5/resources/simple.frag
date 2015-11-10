@@ -16,6 +16,35 @@ in vec3 normalFrag;
 
 out vec4 fragColor;
 
+
+//vec4 swirl()
+//{
+//    float range = 10000.0;
+//    
+//    vec3 toFrag = posFrag.xyz;
+//    
+//
+//    
+//    
+//    float dis = length(toFrag);
+//    
+//    if(abs(dis-range)<2){
+//        return vec4(0,0,0,0);
+//    }
+//    
+//    
+//    float scale = ( pow(1-dis/range,cos(elapsedTime)*5))*5;
+//    
+//    mat2 rotZ = mat2(cos(scale), sin(scale), -sin(scale), cos(scale));
+//    vec2 swlCoord = rotZ * toFrag.xy;
+//    return texture(texId, (cursorAbsolutePos+swlCoord)/res);
+//}
+
+
+
+
+
+
 void main()
 {
     if (shadingMode!=0&&shadingMode!=1) {

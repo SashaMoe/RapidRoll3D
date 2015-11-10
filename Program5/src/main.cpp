@@ -2,7 +2,7 @@
 #define printusers() printf("Program by David Caggiano + Tianjiao Mo\n");
 
 #define _CRT_SECURE_NO_WARNINGS
-#define RESOLUTION 512
+#define RESOLUTION 1024
 #define TARGET_FPS 30                // controls spin update rate
 #define TIME_BETWEEN_UPDATES 0.015   // seconds between motion updates
 #define PRINT_FPS_INTERVAL 10.0f
@@ -39,11 +39,11 @@ public:
 	Program4()
 	{
 		getWindowContext();
+        render.init(state);
+        resize(App->getSize().x, App->getSize().y);
 
-		WorldState state;
-		render.init(state);
-		
-		previousPos = glm::vec2(0);
+        render.buildRenderBuffers(App->getSize().x, App->getSize().y);
+        previousPos = glm::vec2(0);
 		buttonDown[0]=false;
 		buttonDown[1]=false;
 		buttonDown[2]=false;
@@ -83,13 +83,23 @@ public:
 private:
 	sf::Window * App;
 	RenderEngine render;
-	
+    WorldState state;
 	sf::Clock timer;
 	float lastUpdate;
 	float motionTime;
 	glm::ivec2 previousPos;
 	bool buttonDown[3];
 
+
+    void resize(size_t x, size_t y)
+    {
+        
+        state.currentRes[0] = x;
+        state.currentRes[1] = y;
+    
+    }
+    
+    
 	void handleEvents(WorldState & state, RenderEngine & render)
 	{
 		sf::Event event;
@@ -139,6 +149,9 @@ private:
         }
 	}
 	
+    
+
+    
 	void getWindowContext()
 	{
 		sf::err().rdbuf(NULL); //hide errors
