@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -162,9 +163,14 @@ obj_light_disc* obj_parse_light_disc(obj_growable_scene_data *scene)
 obj_vector* obj_parse_vector()
 {
 	obj_vector *v = (obj_vector*)malloc(sizeof(obj_vector));
-	v->e[0] = atof( strtok(NULL, WHITESPACE));
-	v->e[1] = atof( strtok(NULL, WHITESPACE));
-	v->e[2] = atof( strtok(NULL, WHITESPACE));
+	size_t const tokCount = 3;
+	char const * tok;
+	for(size_t i=0; i<tokCount; i++) {
+		tok = strtok(NULL, WHITESPACE);
+		if(tok != NULL)
+			v->e[i] = atof( tok );
+	}
+
 	return v;
 }
 
@@ -271,7 +277,7 @@ int obj_parse_mtl_file(const char *filename, list *material_list)
 		{
 		}
 		// texture map
-		else if( strequal(current_token, "map_Ka") && material_open)
+		else if( strequal(current_token, "map_Kd") && material_open)
 		{
 			strncpy(current_mtl->texture_filename, strtok(NULL, " \t"), OBJ_FILENAME_LENGTH);
 		}
@@ -303,6 +309,11 @@ int obj_parse_obj_file(obj_growable_scene_data *growable_data, const char *filen
 		fprintf(stderr, "Error reading file: %s\n", filename);
 		return 0;
 	}
+	
+	char const * lastSlash = filename;
+	while( NULL != strstr(lastSlash, "/"))
+		  lastSlash = strstr(lastSlash, "/")+1;
+	size_t slashPos = lastSlash - filename;
 
 /*		
 	extreme_dimensions[0].x = INFINITY; extreme_dimensions[0].y = INFINITY; extreme_dimensions[0].z = INFINITY;
@@ -402,7 +413,8 @@ int obj_parse_obj_file(obj_growable_scene_data *growable_data, const char *filen
 		
 		else if( strequal(current_token, "mtllib") ) // mtllib
 		{
-			strncpy(growable_data->material_filename, strtok(NULL, WHITESPACE), OBJ_FILENAME_LENGTH);
+			strncpy(growable_data->material_filename, filename, slashPos);
+			strncpy(growable_data->material_filename+slashPos, strtok(NULL, WHITESPACE), OBJ_FILENAME_LENGTH-slashPos);
 			obj_parse_mtl_file(growable_data->material_filename, &growable_data->material_list);
 			continue;
 		}

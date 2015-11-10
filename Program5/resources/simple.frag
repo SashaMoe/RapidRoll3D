@@ -1,5 +1,6 @@
 #version 330
 
+uniform sampler2D texSampler;
 uniform mat4 P;
 uniform mat4 C;
 uniform mat4 mT;
@@ -13,6 +14,7 @@ uniform int shadingMode;
 smooth in vec4 smoothColor;
 in vec4 posFrag;
 in vec3 normalFrag;
+in vec2 texMapping;
 
 out vec4 fragColor;
 
@@ -30,12 +32,12 @@ void main()
         float specular = clamp(dot(r, v),0,1);
         
         vec4 Ia = vec4(vec3(0.1)*vec3(1),1);
-        vec4 Id = vec4(normalFrag*0.5+0.5, 1)*diffuse;
+        vec4 Id = vec4(normalFrag, 1)*diffuse;
         vec4 Is = vec4(1)*pow(specular,10);
         fragColor = Ia+Id+Is;
     }else{
         fragColor = smoothColor;
     }
     
-    
+    fragColor = texture(texSampler, texMapping);
 }

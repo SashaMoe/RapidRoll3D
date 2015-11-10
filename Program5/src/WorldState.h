@@ -19,7 +19,7 @@ private:
     float speed = 0.2f;
     float acceleration = 9.8f;
     float mouseSensitive = 0.01f;
-    float moveUpV = 0.1f;
+    float moveUpV = 0.0f;
     
 	float frameTimes[NUM_TRACKED_FRAMES];
 	float currentTime;
@@ -28,32 +28,11 @@ private:
     int bluePlaneCount = 4;
     int pointedPlaneCount = 4;
     int shatterPlaneCount = 4;
-    
-	Model model;
-    //Model model2;
-    
-//    Model *bluePlanes = new Model[bluePlaneCount];
-//    Model *pointedPlanes = new Model[pointedPlaneCount];
-//    Model *shatterPlanes = new Model[shatterPlaneCount];
-//    
-//    glm::mat4 *bluePlaneTranslate = new glm::mat4[bluePlaneCount];
-//    glm::mat4 *pointedPlaneTranslate = new glm::mat4[pointedPlaneCount];
-//    glm::mat4 *shatterPlaneTranslate = new glm::mat4[shatterPlaneCount];
-    
-    //Model *onPlane;
-    //glm::mat4 onPlaneTranslate;
-    
 
     ModelLoader figureModel;
     ModelLoader bluePlaneModel;
     ModelLoader pointedPlaneModel;
     ModelLoader shatterPlaneModel;
-    
-    
-    
-    
-    
-    
     
     int shadingMode;
     
@@ -73,17 +52,12 @@ private:
     glm::mat4 modelIncrement;
     glm::mat4 modelTranslate;
     
-    //glm::mat4 figureRotate;
-    //glm::mat4 figureTranslate;
-    
-    //glm::mat4 planeTranslate;
-    
+    glm::vec3 center = glm::vec3(0);
+    glm::vec3 max = glm::vec3(30);
+    glm::vec3 min = glm::vec3(-30);
+    glm::vec3 dim = max-min;
+
     glm::mat4 cameraMatrix;
-    
-    
-    //glm::mat4 planeTrans;
-    //glm::mat4 heroTrans;
-    
 
     int mousePosX;
     int mousePosY;
@@ -103,36 +77,9 @@ public:
         
         shadingMode = 0;
 		running = true;
-		model = Model();
-        model.init("resources/sphere.obj");
         
-//        for (int i=0; i<bluePlaneCount; i++) {
-//            Model m = Model();
-//            m.init("resources/bluePlane.obj");
-//            bluePlanes[i] = m;
-//            bluePlaneTranslate[i] = glm::mat4(1);
-//        }
-//        
-//        for (int i=0; i<pointedPlaneCount; i++) {
-//            Model m = Model();
-//            m.init("resources/PointedPlane.obj");
-//            pointedPlanes[i] = m;
-//            pointedPlaneTranslate[i] = glm::mat4(1);
-//        }
-//        
-//        for (int i=0; i<shatterPlaneCount; i++) {
-//            Model m = Model();
-//            m.init("resources/ShatterPlane.obj");
-//            shatterPlanes[i] = m;
-//            shatterPlaneTranslate[i] = glm::mat4(1);
-//        }
-        
-        //onPlane = NULL;
-        //onPlaneTranslate = glm::mat4(1);
-        
-		//model2.init("resources/BluePlane.obj");
         figureModel.init("resources/sphere.obj");
-        bluePlaneModel.init("resources/bluePlane.obj");
+        bluePlaneModel.init("resources/BluePlaneUV.obj");
         pointedPlaneModel.init("resources/PointedPlane.obj");
         shatterPlaneModel.init("resources/ShatterPlane.obj");
         
@@ -153,10 +100,6 @@ public:
             shatterPlane[i].translate(glm::translate(glm::mat4(1), glm::vec3(-20+i*15, -15, 0)));
         }
         
-		glm::vec3 center = model.getCentroid();
-		glm::vec3 max = model.getMaxBound();
-		glm::vec3 min = model.getMinBound();
-		glm::vec3 dim = model.getDimension();
         printf("model loaded: bounds");
 		printf("[%.2f %.2f %.2f]..", min[0], min[1], min[2]);
 		printf("[%.2f %.2f %.2f] ", max[0], max[1], max[2]);
@@ -171,15 +114,7 @@ public:
         lightRotate = glm::mat4(1);
         lightIncrement = glm::rotate(glm::mat4(1), -0.05f, glm::vec3(0,1,0));
         
-        //modelRotate = glm::mat4(1);
-        //modelIncrement = glm::rotate(glm::mat4(1), 0.02f, glm::vec3(0,1,0));
-        modelTranslate = glm::translate(glm::mat4(1), -model.getCentroid());
-        
-
-        //figureRotate = glm::mat4(1);
-        //figureTranslate = glm::mat4(1);
-        
-        //planeTranslate = glm::translate(glm::mat4(1), glm::vec3(0,-5,0));
+        modelTranslate = glm::translate(glm::mat4(1), -center);
         
         mousePosX = 256;
         mousePosY = 256;
@@ -212,9 +147,6 @@ public:
 		fps = 1.0f / avg;
 		printf("fps %f\n", fps);
 	}
-	
-	Model const & getModel() const
-	{ return model; }
     
 	void setRunning(bool r)
 	{ running = r; }
@@ -335,35 +267,15 @@ public:
             glm::mat4 trans = glm::translate(glm::mat4(1), glm::vec3(0,figureY-planeY,0));
             moveFigure(trans);
             dropV = 0;
-            printf("stop\n");
         }
-        printf("stick\n");
     }
-	
-	Model & getModel()
-	{ return model; }
     
-//    Model* & getBluePlanes()
-//    { return bluePlanes; }
-//    
-//    Model* & getPointedPlanes()
-//    { return pointedPlanes; }
-//    
-//    Model* & getShatterPlanes()
-//    { return shatterPlanes; }
+    glm::vec3 getDimension() {
+        return dim;
+    }
     
 	glm::mat4 getModelTranslate() const
 	{ return modelTranslate; }
-//    
-//    glm::mat4* getBluePlaneTranslate() const
-//    { return bluePlaneTranslate; }
-//    
-//    glm::mat4* getPointedPlaneTranslate() const
-//    { return pointedPlaneTranslate; }
-//    
-//    glm::mat4* getShatterPlaneTranslate() const
-//    { return shatterPlaneTranslate; }
-    
     
     /*
      Get methods for Models
@@ -401,25 +313,8 @@ public:
         return this->shatterPlane;
     }
     
-    
-    
-    
-    
-    
-    
-    
-//    glm::mat4 getFigureTranslate() const
-//    { return figureTranslate; }
-
-    
-//    glm::mat4 getPlaneTranslate() const
-//    { return planeTranslate; }
-    
     glm::mat4 getModelRotate() const
     { return modelRotate; }
-    
-//    glm::mat4 getFigureRotate() const
-//    { return figureRotate; }
     
     glm::mat4 getLightRotate() const
     { return lightRotate; }
@@ -452,6 +347,86 @@ public:
     { figureDrop = !figureDrop; }
     
     
+    glm::mat4 getFigureTranslate(glm::mat4 trans){
+        glm::vec4 figureBound = figure.getBound();
+        float figureXMin = figureBound.x+trans[3][0];
+        float figureXMax = figureBound.y+trans[3][0];
+        float figureYMin = figure.getLowY()+trans[3][1];
+        float figureYMax = figure.getHighY()+trans[3][1];
+        float figureZMin = figureBound.z+trans[3][2];
+        float figureZMax = figureBound.w+trans[3][2];
+        
+        for (int i=0; i<bluePlaneCount; i++) {
+            Plane p = plane[i];
+            glm::vec4 planeBound = p.getBound();
+            float planeYMin = p.getLowY();
+            float planeYMax = p.getHighY();
+            if (!(planeYMin>figureYMax || planeYMax < figureYMin)) {
+                if ((planeBound.x<figureXMin && figureXMin<planeBound.y)
+                    && (figureXMax>planeBound.y)
+                    && ((planeBound.z<figureZMin && figureZMin<planeBound.w)
+                        || (planeBound.z<figureZMax && figureZMax<planeBound.w))) {
+                    trans[3][0] = planeBound.y-figureBound.x;
+                } else if ((planeBound.x<figureXMax && figureXMax<planeBound.y)
+                           && (figureXMin<planeBound.x)
+                           && ((planeBound.z<figureZMin && figureZMin<planeBound.w)
+                               || (planeBound.z<figureZMax && figureZMax<planeBound.w))){
+                    trans[3][0] = planeBound.x-figureBound.y;
+                } else if ((planeBound.z<figureZMin && figureZMin<planeBound.w)
+                           && (figureZMax>planeBound.w)
+                           && ((planeBound.x<figureXMin && figureXMin<planeBound.y)
+                               || (planeBound.x<figureXMax && figureXMax<planeBound.y))) {
+                    trans[3][2] = planeBound.w-figureBound.z;
+                } else if ((planeBound.z<figureZMax && figureZMax<planeBound.w)
+                           && (figureZMin<planeBound.z)
+                           && ((planeBound.x<figureXMin && figureXMin<planeBound.y)
+                               || (planeBound.x<figureXMax && figureXMax<planeBound.y))) {
+                    trans[3][2] = planeBound.z-figureBound.w;
+                }
+            }
+        }
+        
+        for (int i=0; i<pointedPlaneCount; i++) {
+            PointedPlane p = pointedPlane[i];
+            glm::vec4 planeBound = p.getBound();
+            float planeYMin = p.getLowY();
+            float planeYMax = p.getHighY();
+            if (!(planeYMin>figureYMax || planeYMax < figureYMin)) {
+                if (planeBound.x<figureXMin && figureXMin<planeBound.y) {
+                    trans[3][0] = planeBound.y-figureBound.x;
+                } else if (planeBound.x<figureXMax && figureXMax<planeBound.y){
+                    trans[3][0] = planeBound.x-figureBound.y;
+                } else if (planeBound.z<figureZMin && figureZMin<planeBound.w) {
+                    trans[3][2] = planeBound.w-figureBound.z;
+                } else if (planeBound.z<figureZMax && figureZMax<planeBound.w) {
+                    trans[3][2] = planeBound.z-figureBound.w;
+                }
+            }
+        }
+        
+        for (int i=0; i<shatterPlaneCount; i++) {
+            ShatterPlane p = shatterPlane[i];
+            glm::vec4 planeBound = p.getBound();
+            float planeYMin = p.getLowY();
+            float planeYMax = p.getHighY();
+            if (!(planeYMin>figureYMax || planeYMax < figureYMin)) {
+                if (planeBound.x<figureXMin && figureXMin<planeBound.y) {
+                    trans[3][0] = planeBound.y-figureBound.x;
+                } else if (planeBound.x<figureXMax && figureXMax<planeBound.y){
+                    trans[3][0] = planeBound.x-figureBound.y;
+                } else if (planeBound.z<figureZMin && figureZMin<planeBound.w) {
+                    trans[3][2] = planeBound.w-figureBound.z;
+                } else if (planeBound.z<figureZMax && figureZMax<planeBound.w) {
+                    trans[3][2] = planeBound.z-figureBound.w;
+                }
+            }
+        }
+
+        
+        return trans;
+    }
+    
+    
     void moveFigure(glm::mat4 trans)
     {
         figure.translate(trans);
@@ -465,7 +440,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), forwardVec*speed);
-        moveFigure(trans);
+        moveFigure(getFigureTranslate(trans));
     }
     
     void moveDown()
@@ -474,7 +449,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 forwardVec = normalize(glm::vec3(x, 0, z));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), -forwardVec*speed);
-        moveFigure(trans);
+        moveFigure(getFigureTranslate(trans));
     }
     
     void moveLeft()
@@ -483,7 +458,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), -rightVec*speed);
-        moveFigure(trans);
+        moveFigure(getFigureTranslate(trans));
     }
     
     void moveRight()
@@ -492,7 +467,7 @@ public:
         GLfloat z = (cameraLook-cameraPos).z;
         glm::vec3 rightVec = normalize(cross(glm::vec3(x, 0, z), glm::vec3(0, 1, 0)));
         glm::mat4 trans = glm::translate(glm::mat4(1.0f), rightVec*speed);
-        moveFigure(trans);
+        moveFigure(getFigureTranslate(trans));
     }
     
     void rotateCamera(int x, int y){

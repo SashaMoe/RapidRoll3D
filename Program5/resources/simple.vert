@@ -12,16 +12,18 @@ uniform vec4 lightPos;
 uniform vec4 camPos;
 uniform int shadingMode;
 
-in vec3 pos;
-in vec3 colorIn;
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec2 texCoord;
+layout(location = 2) in vec3 colorIn;
 
 out vec4 posFrag;
 out vec3 normalFrag;
+out vec2 texMapping;
 smooth out vec4 smoothColor;
 
 vec4 justColor()
 {
-    return vec4(colorIn*0.5+0.5, 1);
+    return vec4(colorIn, 1);
 }
 
 vec4 gouraud()
@@ -49,36 +51,8 @@ vec4 phong()
 
 void main()
 {
-    //TODO add gouraud and phong shading support
-    
     vec4 pos = vec4(pos, 1);
     gl_Position = P*M*trans*pos;
-
-
-  
-    
-    vec4 posActual = mR * mT * trans *  pos;
-    
-    vec4 lpActual = L * lightPos;
-    
-    vec4 lightVector = lpActual - posActual;
-    
-    
-    //TODO add gouraud and phong shading support
-    
-    vec4 normal = vec4(colorIn,1)*2 - 1;
-    
-    normal = mR * normal;
-    
-    vec4 normalActual = normal;
-    //vec4 normal = vec4(colorIn,1);
-    
-    vec4 direction = normalize(lightVector);
-
-    normalActual = normalize(normalActual);
-
-    
-
     
     if(shadingMode == 0)
     {
@@ -98,4 +72,6 @@ void main()
         normalFrag = colorIn;
         smoothColor = phong();
     }
+    
+    texMapping = texCoord;
 }

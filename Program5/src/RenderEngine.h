@@ -45,12 +45,13 @@ public:
 		glCullFace(GL_BACK);
 		glEnable(GL_CULL_FACE);
         
-		glm::vec3 dim = state.getModel().getDimension();
+		glm::vec3 dim = state.getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
 		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.1f, maxDim*10.0f);
         
 		
-		setupShader();
+        setupShader();
+        setupTextures();
 		//setupBuffers(state.getModel());
         setupBuffersBluePlane(state.getBluePlaneModel());
         setupBuffersFigure(state.getFigureModel());
@@ -75,7 +76,7 @@ public:
         
         //printf("lightPos : %f-%f-%f\n",lightPos.a,lightPos.b,lightPos.g);
         //hacky light source size change
-        GLfloat maxDis = state.getModel().getDimension()[2] * 3;
+        GLfloat maxDis = state.getDimension()[2] * 3;
         GLfloat distScale = 1.0f / (glm::length(L*lightPos - camPos) / maxDis);
         glPointSize(glm::mix(1.0f, 10.0f, distScale));
         
@@ -95,6 +96,19 @@ public:
         glUniform4fv(glGetUniformLocation(shaderProg, "lightPos"), 1, &lightPos[0]);
         glUniform4fv(glGetUniformLocation(shaderProg, "camPos"), 1, &camPos[0]);
         glUniform1i(glGetUniformLocation(shaderProg, "shadingMode"), state.getShadingMode());
+        
+        for(int i=0; i<1; i++)
+        {
+            //TODO bind the texture object
+            glBindTexture(GL_TEXTURE_2D, bluePlaneTextures[i]);
+            
+            //TODO activate a texture unit
+            GLint texUnitId = 0;
+            glActiveTexture(GL_TEXTURE0+texUnitId);
+            
+            //TODO bind the sampler to a texture unit
+            glUniform1i(glGetUniformLocation(shaderProg, "texSampler"), texUnitId);
+        }
 		
 		//draw figure
         glBindVertexArray(vertexArrayFigure);
@@ -116,6 +130,8 @@ public:
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
             glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         }
+        
+        checkGLError("blueplane");
         
         //draw pointed plane
          glBindVertexArray(vertexArrayPointedPlane);
@@ -191,6 +207,7 @@ private:
     GLuint vertexArrayPointedPlane;
     GLuint vertexArrayShatterPlane;
     GLuint vertexArrayFigure;
+    GLuint bluePlaneTextures[1];
 	
     glm::mat4 P;
 	glm::mat4 C;
@@ -269,22 +286,12 @@ private:
 		char const * fragPath = "resources/simple.frag";
 		shaderProg = ShaderManager::shaderFromFile(&vertPath, &fragPath, 1, 1);
         
-        
-        //char const * lightPath = "resources/lightPos.vert";
-        //lightProg = ShaderManager::shaderFromFile(&lightPath, &fragPath, 1, 1);
-        
         char const * lightVPath = "resources/lightPos.vert";
         char const * lightFPath = "resources/lightPos.frag";
         lightProg = ShaderManager::shaderFromFile(&lightVPath, &lightFPath, 1, 1);
         
 		checkGLError("shader");
 	}
-
-    
-    
-    
-    
-    
     
     void setupBuffersFigure(ModelLoader & model){
         glGenVertexArrays(1, &vertexArrayFigure);
@@ -356,10 +363,6 @@ private:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
     }
-
-    
-    
-    
     
     void setupBuffersPointedPlane(ModelLoader & model){
         glGenVertexArrays(1, &vertexArrayPointedPlane);
@@ -403,19 +406,37 @@ private:
         glBindVertexArray(vertexArrayBluePlane);
         
         GLuint positionBuffer;
+        GLuint texCoordBuffer;
         GLuint colorBuffer;
         GLuint elementBuffer;
         GLint colorSlot;
         GLint positionSlot;
+        GLint texCoordSlot;
         
         //setup position buffer
         glGenBuffers(1, &positionBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
         glBufferData(GL_ARRAY_BUFFER, model.getPositionBytes(), &model.getPosition()[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
         positionSlot = glGetAttribLocation(shaderProg, "pos");
+        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
         glEnableVertexAttribArray(positionSlot);
         glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        glGenBuffers(1, &texCoordBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getTexCoordBytes(), &model.getTexCoord()[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        texCoordSlot = glGetAttribLocation(shaderProg, "texCoord");
+        glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+        glEnableVertexAttribArray(texCoordSlot);
+        glVertexAttribPointer(texCoordSlot, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        checkGLError("tex");
         
         // Do the same thing for the color data
         glGenBuffers(1, &colorBuffer);
@@ -476,6 +497,56 @@ private:
 
 		checkGLError("setup");
 	}
+    
+    void setupTextures()
+    {
+        //generate texture names
+        glGenTextures(1, bluePlaneTextures);
+        sf::Image image;
+        
+        char const * imagePaths[1] = {"resources/front.png"};
+        
+        for(int i=0; i<1; i++)
+        {
+            if (!image.loadFromFile(imagePaths[i])) {
+                fprintf(stderr, "Could not load: %s\n", imagePaths[i]);
+                exit(2);
+            }
+            int texSizeX = image.getSize().x;
+            int texSizeY = image.getSize().y;
+            unsigned char * texData = (unsigned char*) image.getPixelsPtr();
+            
+            //TODO bind a texture object
+            glBindTexture(GL_TEXTURE_2D, bluePlaneTextures[i]);
+            
+            //TODO set min/mag sampling parameters
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            
+            //TODO set edge wrap parameters
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            
+            //TODO upload texture and generate mipmap
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texSizeX, texSizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+            bool  mipmapEnabled = true;
+            if(mipmapEnabled)
+            {
+                //mip mapping, upload 0 level, then build maps
+                glGenerateMipmap(GL_TEXTURE_2D);
+            }
+            else
+            {
+                //no mip mapping, upload 0 level only
+            }
+            
+            //TODO unbind the texture
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        
+        checkGLError("texture");
+    }
+
 };
 
 #endif
