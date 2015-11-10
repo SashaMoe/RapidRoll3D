@@ -51,7 +51,6 @@ public:
         
         setupShader();
         setupTextures();
-		setupBuffers(state.getModel());
         setupBuffersBluePlane(state.getBluePlaneModel());
         setupBuffersFigure(state.getFigureModel());
         setupBuffersPointedPlane(state.getPointedPlaneModel());
@@ -377,6 +376,28 @@ private:
         glGenBuffers(1, &elementBuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
+        
+        
+        static const GLfloat quadVertexData[] = {
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+        };
+        
+        glGenVertexArrays(1, &quadVertexArray);
+        glBindVertexArray(quadVertexArray);
+        GLuint quadVertexBuffer;
+        glGenBuffers(1, &quadVertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(glGetAttribLocation(textureProg, "pos"));
+        glVertexAttribPointer(glGetAttribLocation(textureProg, "pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+        
+        
     }
 
     
@@ -556,24 +577,7 @@ private:
 
         
         
-        static const GLfloat quadVertexData[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
-        };
-        
-        glGenVertexArrays(1, &quadVertexArray);
-        glBindVertexArray(quadVertexArray);
-        GLuint quadVertexBuffer;
-        glGenBuffers(1, &quadVertexBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(glGetAttribLocation(textureProg, "pos"));
-        glVertexAttribPointer(glGetAttribLocation(textureProg, "pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
-
+       
         
         
         
