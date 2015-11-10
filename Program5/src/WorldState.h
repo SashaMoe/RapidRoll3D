@@ -70,6 +70,8 @@ private:
     
     
 public:
+    
+    int currentRes[2];
 	WorldState()
 	{
 		for(size_t i=0; i<NUM_TRACKED_FRAMES; i++)
@@ -127,6 +129,9 @@ public:
 
 	}
 	
+    
+
+    
 	void updateFrameTime(float timeAsSeconds)
 	{
 		for(size_t i=1; i<NUM_TRACKED_FRAMES; i++)

@@ -157,7 +157,7 @@ public:
         return glm::vec3(30,30,30);}
     
     glm::vec3 getCentroid()
-    { return center; }
+    { return glm::vec3(0,0,0); }
     
     glm::vec3 getDimension()
     { return dim; }
@@ -235,16 +235,6 @@ private:
 
 	glm::vec3 computeCentroid()
 	{
-		glm::vec3 center = glm::vec3(0);
-		float positionCount = 1.0f/(positions.size()/3.0f);
-		
-		for(int i=0; i<positions.size(); i+=3)
-		{
-			center[0] += positions[i] * positionCount;
-			center[1] += positions[i+1] * positionCount;
-			center[2] += positions[i+2] * positionCount;
-		}
-		
         return glm::vec3(0,0,0);
 	}
 	
