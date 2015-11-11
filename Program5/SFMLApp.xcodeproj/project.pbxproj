@@ -18,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		11F0C58F1BF26C4C00F21C4E /* texture.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = texture.frag; sourceTree = "<group>"; };
+		11F0C5901BF26C4C00F21C4E /* texture.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = texture.vert; sourceTree = "<group>"; };
 		8113B9B61BEAF4D9007E85E9 /* Plane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Plane.h; sourceTree = "<group>"; };
 		81BEF2B81BEED12D008E1A7A /* PointedPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PointedPlane.h; sourceTree = "<group>"; };
 		81BEF2BA1BEED158008E1A7A /* ShatterPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShatterPlane.h; sourceTree = "<group>"; };
@@ -319,6 +321,8 @@
 		AF0E3A7A1BC05DD900D0BE0D /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				11F0C58F1BF26C4C00F21C4E /* texture.frag */,
+				11F0C5901BF26C4C00F21C4E /* texture.vert */,
 				AF0E3A7F1BC05DD900D0BE0D /* lightPos.vert */,
 				AF0E3A821BC05DD900D0BE0D /* simple.frag */,
 				AF0E3A831BC05DD900D0BE0D /* simple.vert */,

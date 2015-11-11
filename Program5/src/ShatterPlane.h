@@ -1,6 +1,7 @@
 class ShatterPlane{
     
 private:
+    int size = 40;
     glm::mat4 translation;
     glm::vec3 location;
     glm::vec4 bound;
@@ -31,6 +32,10 @@ public:
     void translate(glm::mat4 trans){
         this->translation = trans*this->translation;
         this->location = glm::vec3(trans*glm::vec4(location, 1));
+        if (this->location.y>size*2.0f) {
+            glm::mat4 trans = glm::translate(glm::mat4(1), glm::vec3(rand()%(size-10)-(size-10)/2, -size*2, rand()%(size-10)-(size-10)/2))*glm::inverse(translation);
+            translate(trans);
+        }
     }
     
     glm::vec4 getBound(){

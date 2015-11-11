@@ -47,7 +47,7 @@ public:
         
 		glm::vec3 dim = state.getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
-		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.1f, maxDim*10.0f);
+		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.001f, maxDim*100.0f);
         
         setupShader();
         setupTextures();
@@ -55,6 +55,8 @@ public:
         setupBuffersFigure(state.getFigureModel());
         setupBuffersPointedPlane(state.getPointedPlaneModel());
         setupBuffersShatterPlane(state.getShatterPlaneModel());
+        setupBuffersRoof(state.getPointedPlaneModel());
+
         
 	}
     
@@ -130,7 +132,7 @@ public:
 		//use shader
 		glUseProgram(shaderProg);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         
@@ -173,7 +175,7 @@ public:
         
         //draw blue plane
          glBindVertexArray(vertexArrayBluePlane);
-        for(int i=0;i<4;i++){
+        for(int i=0;i<8;i++){
             trans = state.getPlanes()[i].getTranslation();
             glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
             glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
@@ -197,13 +199,19 @@ public:
             glDrawElements(GL_TRIANGLES, state.getShatterPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         }
         
+        //draw roof
+        glBindVertexArray(vertexArrayRoof);
+        trans = state.getRoof().getTranslation();
+        glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+        glDrawElements(GL_TRIANGLES, state.getPointedPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+        
         
 //        glBindVertexArray(0);
 //        glUseProgram(0);
 //        
 //        
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(textureProg);
        
@@ -250,6 +258,7 @@ private:
     GLuint vertexArrayPointedPlane;
     GLuint vertexArrayShatterPlane;
     GLuint vertexArrayFigure;
+    GLuint vertexArrayRoof;
     GLuint bluePlaneTextures[1];
 	
     glm::mat4 P;
@@ -527,10 +536,39 @@ private:
     }
     
     
-    
-    
-    
-    
+    void setupBuffersRoof(ModelLoader & model){
+        glGenVertexArrays(1, &vertexArrayRoof);
+        glBindVertexArray(vertexArrayRoof);
+        
+        GLuint positionBuffer;
+        GLuint colorBuffer;
+        GLuint elementBuffer;
+        GLint colorSlot;
+        GLint positionSlot;
+        
+        //setup position buffer
+        glGenBuffers(1, &positionBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getPositionBytes(), &model.getPosition()[0], GL_STATIC_DRAW);
+        positionSlot = glGetAttribLocation(shaderProg, "pos");
+        glEnableVertexAttribArray(positionSlot);
+        glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // Do the same thing for the color data
+        glGenBuffers(1, &colorBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getColorBytes(), &model.getColor()[0], GL_STATIC_DRAW);
+        colorSlot =    glGetAttribLocation(shaderProg, "colorIn");
+        glEnableVertexAttribArray(colorSlot);
+        glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        // now the elements
+        glGenBuffers(1, &elementBuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
+    }
     
     
     

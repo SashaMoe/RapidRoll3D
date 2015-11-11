@@ -61,9 +61,9 @@ void main()
 {
     
     fragColor = smoothColor;
-    fragColor = vec4(texCoord, 1, 1);
+    //fragColor = vec4(texCoord, 1, 1);
     
     fragColor = texture(texId, texCoord);
-    fragColor = swirl();
+    //fragColor = swirl();
     
 }
