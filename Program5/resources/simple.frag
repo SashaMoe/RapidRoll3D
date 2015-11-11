@@ -39,6 +39,6 @@ void main()
         fragColor = smoothColor;
     }
     //fragColor = vec4(texMapping, 1, 1);
-    fragColor = texture(texSampler, texMapping);
-    fragColor = smoothColor;
+    //fragColor = texture(texSampler, texMapping);
+    //fragColor = smoothColor;
 }

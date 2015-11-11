@@ -125,7 +125,10 @@ public:
         cameraLook = glm::vec3(0,0,0);
         cameraUp = glm::vec3(0,1,0);
         
-        lightPos = glm::vec4((max-center)*1.3f, 1);
+        
+        lightPos = glm::vec4(15,25,0,0);
+        lightPos[1] = 15;
+        
         lightIntensity = glm::vec3(1,1,1);
         lightRotate = glm::mat4(1);
         lightIncrement = glm::rotate(glm::mat4(1), -0.05f, glm::vec3(0,1,0));

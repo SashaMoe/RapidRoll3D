@@ -130,11 +130,32 @@ public:
         //printf("light %f %f %f\n", lightPos[0], lightPos[1], lightPos[2]);
 		
 		//use shader
-		glUseProgram(shaderProg);
+		
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        
+        
+        glUseProgram(lightProg);
 
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "P"), 1, GL_FALSE, &P[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "C"), 1, GL_FALSE, &C[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mR"), 1, GL_FALSE, &mR[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mT"), 1, GL_FALSE, &mT[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "M"), 1, GL_FALSE, &M[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "N"), 1, GL_FALSE, &N[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "L"), 1, GL_FALSE, &L[0][0]);
+        glUniform4fv(glGetUniformLocation(lightProg, "lightPos"), 1, &lightPos[0]);
+        glUniform4fv(glGetUniformLocation(lightProg, "camPos"), 1, &camPos[0]);
+        glUniform1i(glGetUniformLocation(lightProg, "shadingMode"), state.getShadingMode());
+        
+        glBindVertexArray(lightArray);
+        
+        glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
+        
+        
+        glUseProgram(shaderProg);
         
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "P"), 1, GL_FALSE, &P[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "C"), 1, GL_FALSE, &C[0][0]);
@@ -146,6 +167,12 @@ public:
         glUniform4fv(glGetUniformLocation(shaderProg, "lightPos"), 1, &lightPos[0]);
         glUniform4fv(glGetUniformLocation(shaderProg, "camPos"), 1, &camPos[0]);
         glUniform1i(glGetUniformLocation(shaderProg, "shadingMode"), state.getShadingMode());
+        
+       
+
+        
+        
+        
         
         for(int i=0; i<1; i++)
         {
@@ -404,6 +431,13 @@ private:
         glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
         glEnableVertexAttribArray(glGetAttribLocation(textureProg, "pos"));
         glVertexAttribPointer(glGetAttribLocation(textureProg, "pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+        
+        
+        
+        glGenVertexArrays(1, &lightArray);
+        glBindVertexArray(lightArray);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+        glBindVertexArray(0);
 
         
         
@@ -608,11 +642,7 @@ private:
 		//leave the element buffer active
         
 		//hacky way to draw the light
-        glGenVertexArrays(1, &lightArray);
-        glBindVertexArray(lightArray);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-		glBindVertexArray(0);
-
+       
         
         
        

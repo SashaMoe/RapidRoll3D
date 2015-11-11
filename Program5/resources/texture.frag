@@ -29,7 +29,7 @@ vec2 texCoord = fragCoord/res;
 
 vec4 swirl()
 {
-    float range = 80000.0;
+    float range = 100000.0;
     
     vec2 toFrag = fragCoord;
     
@@ -64,6 +64,6 @@ void main()
     //fragColor = vec4(texCoord, 1, 1);
     
     fragColor = texture(texId, texCoord);
-    //fragColor = swirl();
+    fragColor = swirl();
     
 }
