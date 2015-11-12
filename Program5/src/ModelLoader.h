@@ -10,44 +10,72 @@ class ModelLoader
 public:
 
     
-    void init(const char *path)
+    void init(const char *path, bool hasUV)
     {
         objLoader loader;
         loader.load(path);
         
-        
-        for(size_t i=0; i<loader.vertexCount; i++) {
-            positions.push_back(loader.vertexList[i]->e[0]);
-            positions.push_back(loader.vertexList[i]->e[1]);
-            positions.push_back(loader.vertexList[i]->e[2]);
-            //printf("v%zu: %f %f %f\n", i, positions[i*3+0], positions[i*3+1], positions[i*3+2]);
-        }
-        
-        for(size_t i=0; i<loader.textureCount; i++) {
-            texCoords.push_back(loader.textureList[i]->e[0]);
-            texCoords.push_back(loader.textureList[i]->e[1]);
-            //printf("v%zu: %f %f\n", i, texCoords[i*2+0], texCoords[i*2+1]);
-        }
-        
-        for(size_t i=0; i<loader.faceCount; i++) {
-            if(loader.faceList[i]->vertex_count != 3) {
-                fprintf(stderr, "Skipping non-triangle face %zu.\n", i);
-                continue;
-                //exit(1);
+        if (hasUV) {
+            for(size_t i=0; i<loader.faceCount; i++) {
+                if(loader.faceList[i]->vertex_count != 3) {
+                    fprintf(stderr, "Skipping non-triangle face %zu.\n", i);
+                    continue;
+                    //exit(1);
+                }
+                GLuint positionIndex0 = loader.faceList[i]->vertex_index[0];
+                GLuint positionIndex1 = loader.faceList[i]->vertex_index[1];
+                GLuint positionIndex2 = loader.faceList[i]->vertex_index[2];
+                GLuint texCoordIndex0 = loader.faceList[i]->texture_index[0];
+                GLuint texCoordIndex1 = loader.faceList[i]->texture_index[1];
+                GLuint texCoordIndex2 = loader.faceList[i]->texture_index[2];
+                
+                elements.push_back(positionIndex0);
+                positions.push_back(loader.vertexList[positionIndex0]->e[0]);
+                positions.push_back(loader.vertexList[positionIndex0]->e[1]);
+                positions.push_back(loader.vertexList[positionIndex0]->e[2]);
+                texCoords.push_back(loader.textureList[texCoordIndex0]->e[0]);
+                texCoords.push_back(loader.textureList[texCoordIndex0]->e[0]);
+                
+                elements.push_back(positionIndex1);
+                positions.push_back(loader.vertexList[positionIndex1]->e[0]);
+                positions.push_back(loader.vertexList[positionIndex1]->e[1]);
+                positions.push_back(loader.vertexList[positionIndex1]->e[2]);
+                texCoords.push_back(loader.textureList[texCoordIndex1]->e[0]);
+                texCoords.push_back(loader.textureList[texCoordIndex1]->e[0]);
+                
+                elements.push_back(positionIndex2);
+                positions.push_back(loader.vertexList[positionIndex2]->e[0]);
+                positions.push_back(loader.vertexList[positionIndex2]->e[1]);
+                positions.push_back(loader.vertexList[positionIndex2]->e[2]);
+                texCoords.push_back(loader.textureList[texCoordIndex2]->e[0]);
+                texCoords.push_back(loader.textureList[texCoordIndex2]->e[0]);
+            }
+        }else{
+            for(size_t i=0; i<loader.vertexCount; i++) {
+                positions.push_back(loader.vertexList[i]->e[0]);
+                positions.push_back(loader.vertexList[i]->e[1]);
+                positions.push_back(loader.vertexList[i]->e[2]);
+                //printf("v%zu: %f %f %f\n", i, positions[i*3+0], positions[i*3+1], positions[i*3+2]);
             }
             
-            elements.push_back(loader.faceList[i]->vertex_index[0]);
-            elements.push_back(loader.faceList[i]->vertex_index[1]);
-            elements.push_back(loader.faceList[i]->vertex_index[2]);
-            //printf("f%zu: %i %i %i\n", i, elements[i*3+0], elements[i*3+1], elements[i*3+2]);
+            for(size_t i=0; i<loader.faceCount; i++) {
+                if(loader.faceList[i]->vertex_count != 3) {
+                    fprintf(stderr, "Skipping non-triangle face %zu.\n", i);
+                    continue;
+                    //exit(1);
+                }
+                
+                elements.push_back(loader.faceList[i]->vertex_index[0]);
+                elements.push_back(loader.faceList[i]->vertex_index[1]);
+                elements.push_back(loader.faceList[i]->vertex_index[2]);
+                //printf("f%zu: %i %i %i\n", i, elements[i*3+0], elements[i*3+1], elements[i*3+2]);
+            }
         }
-        
         
         vector<glm::vec3> vertexNormals;
         vertexNormals.resize(positions.size());
         for(size_t i=0; i<vertexNormals.size(); i++)
             vertexNormals[i] = glm::vec3(0.0f);
-        
         
         //TODO compute the vertex normals by averaging the face normals
         for(size_t i=0; i<elements.size(); i+=3) {
@@ -88,7 +116,6 @@ public:
             colors.push_back( (vertexNormals[i][1] + 1.0f) * 0.5f);
             colors.push_back( (vertexNormals[i][2] + 1.0f) * 0.5f);
         }
-
     }
     
     vector<GLfloat> const getPosition() const

@@ -13,6 +13,7 @@ uniform vec4 camPos;
 uniform int shadingMode;
 uniform vec2 resolution;
 uniform float elapsedTime;
+uniform float deadTime;
 uniform int enable;
 
 in vec3 pos;

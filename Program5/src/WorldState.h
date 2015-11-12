@@ -48,7 +48,6 @@ private:
     glm::vec3 cameraUp;
     glm::vec4 *lightPos = new glm::vec4[3];
     
-    
     glm::vec3 lightIntensity;
     glm::mat4 lightRotate;
     glm::mat4 lightIncrement;
@@ -71,8 +70,10 @@ private:
     bool shadingMode;
     bool swirlEnable;
     bool discoEnable;
+    bool pause;
     
     bool figureDead;
+    float deadTime;
     
     float dropV = 0;
     
@@ -92,10 +93,10 @@ public:
         shadingMode = 0;
         running = true;
         
-        figureModel.init("resources/sphere.obj");
-        bluePlaneModel.init("resources/BluePlane.obj");
-        pointedPlaneModel.init("resources/PointedPlane.obj");
-        shatterPlaneModel.init("resources/ShatterPlane.obj");
+        figureModel.init("resources/sphere.obj", false);
+        bluePlaneModel.init("resources/BluePlaneUV.obj", true);
+        pointedPlaneModel.init("resources/PointedPlane.obj", false);
+        shatterPlaneModel.init("resources/ShatterPlaneUV.obj", true);
         
         figure.init(figureModel.getBound(), figureModel.getHighestPoint().y, figureModel.getLowestPoint().y);
         
@@ -146,8 +147,10 @@ public:
         modelRotating = false;
         discoEnable = false;
         swirlEnable = false;
+        pause = false;
         
         figureDead = false;
+        deadTime = 0;
         
         resetFigure();
         
@@ -196,46 +199,51 @@ public:
         this->updateFrameTime(elapsed);
         glm::mat4 upTrans = glm::translate(glm::mat4(1), glm::vec3(0,moveUpV,0));
         
-        //spin light
-        if(lightRotating)
-            lightRotate = lightIncrement * lightRotate;
-        
-        //spin model
-        if(modelRotating)
-            modelRotate = modelIncrement * modelRotate;
-        
-        // figure drop
-        float tElapsed = std::max(elapsed, 0.0f);
-        if (checkFigureReachPlane(tElapsed)) {
-            // move with plane
-            moveFigure(upTrans);
-            dropV = 0;
+        if (pause) {
+            if(figureDead){
+                deadTime += elapsed;
+                if (deadTime>2) {
+                    deadTime = 0;
+                    figureDead = false;
+                    pause = false;
+                }
+            }
         }else{
-            dropFigure(tElapsed);
+            //spin light
+            if(lightRotating)
+                lightRotate = lightIncrement * lightRotate;
+            
+            // figure drop
+            float tElapsed = std::max(elapsed, 0.0f);
+            if (checkFigureReachPlane(tElapsed)) {
+                // move with plane
+                moveFigure(upTrans);
+                dropV = 0;
+            }else{
+                dropFigure(tElapsed);
+            }
+            
+            // plane time step
+            for(size_t i = 0 ;i<bluePlaneCount;i++){
+                plane[i].translate(upTrans);
+            }
+            for(size_t i = 0 ;i<pointedPlaneCount;i++){
+                pointedPlane[i].translate(upTrans);
+            }
+            for(size_t i = 0 ;i<shatterPlaneCount;i++){
+                shatterPlane[i].translate(upTrans);
+            }
+            
+            // check if dead
+            if(figure.getHighY()>deathHeightMax || figure.getHighY()<deathHeightMin){
+                figureDead = true;
+            }
+            
         }
-        
-        // plane time step
-        for(size_t i = 0 ;i<bluePlaneCount;i++){
-            plane[i].translate(upTrans);
-        }
-        for(size_t i = 0 ;i<pointedPlaneCount;i++){
-            pointedPlane[i].translate(upTrans);
-        }
-        for(size_t i = 0 ;i<shatterPlaneCount;i++){
-            shatterPlane[i].translate(upTrans);
-        }
-        
-        // check if dead
-        if(figure.getHighY()>deathHeightMax || figure.getHighY()<deathHeightMin){
-            figureDead = true;
-        }
-        
         if(figureDead){
             resetFigure();
-            figureDead = false;
+            pause = true;
         }
-        
-        printf("%f\n", figure.getLocation().y);
         
         this->currentTime = t;
     }
@@ -284,7 +292,7 @@ public:
             float planeYMin = p.getLowY();
             float planeYMax = p.getHighY();
             
-            if (!(figureBound.x>planeBound.y || figureBound.y<planeBound.x || figureBound.z>planeBound.w || figureBound.w<planeBound.z) && figureYMax>planeYMin) {
+            if (!(figureBound.x>=planeBound.y || figureBound.y<=planeBound.x || figureBound.z>=planeBound.w || figureBound.w<=planeBound.z) && figureYMax>=planeYMin) {
                 
                 if (figureYMin<planeYMax) {
                     stickToPlane(figure.getLowY(), planeYMax);
@@ -329,6 +337,7 @@ public:
                     return true;
                 }
             }
+            p->setTimeElapsed(0);
         }
         
         return false;
@@ -429,8 +438,14 @@ public:
     void toggleSwirlEnable()
     { swirlEnable = !swirlEnable; }
     
+    void togglePause()
+    { pause = !pause; }
+    
     int getSwirlEnable() const
     { return this->swirlEnable; }
+    
+    float getDeadTime() const
+    { return this->deadTime; }
     
     
     glm::mat4 getFigureTranslate(glm::mat4 trans){

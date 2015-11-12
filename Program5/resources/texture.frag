@@ -15,6 +15,7 @@ uniform vec2 resolution;
 uniform sampler2D texId;
 smooth in vec4 smoothColor;
 uniform float elapsedTime;
+uniform float deadTime;
 uniform int enable;
 
 //out vec4 fragColor;
@@ -56,6 +57,30 @@ vec4 swirl()
 }
 
 
+vec4 swirl2(float time)
+{
+    float range = 5000.0;
+    
+    vec2 toFrag = fragCoord;
+    
+    float dis = length(toFrag-res/2);
+    
+    float angle = 0;
+    
+    if(dis>range)
+        return texture(texId, texCoord);
+    
+    float scale = ( pow(1- dis/range,sin(time)*600))*5;
+    
+    mat2 rotZ = mat2(cos(scale), sin(scale), -sin(scale), cos(scale));
+    mat2 rot2 = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
+    
+    vec2 swlCoord = rot2 * rotZ * toFrag;
+    
+    
+    return texture(texId, swlCoord/res);
+}
+
 
 
 void main()
@@ -64,10 +89,20 @@ void main()
     fragColor = smoothColor;
     //fragColor = vec4(texCoord, 1, 1);
     
-    if (enable==0) {
+    if(deadTime > 0){
+        fragColor = swirl2(deadTime);
+    }
+    else if(enable == 0){
         fragColor = texture(texId, texCoord);
-    }else{
+    }
+    else{
         fragColor = swirl();
     }
+    
+//    if (enable==0) {
+//
+//    }else{
+//        fragColor = swirl();
+//    }
     
 }

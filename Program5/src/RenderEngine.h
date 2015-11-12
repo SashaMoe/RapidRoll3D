@@ -245,6 +245,7 @@ public:
         glUniform1i(glGetUniformLocation(textureProg, "shadingMode"), state.getShadingMode());
         glUniform2f(glGetUniformLocation(textureProg, "resolution"), state.currentRes[0], state.currentRes[1]);
         glUniform1f(glGetUniformLocation(textureProg, "elapsedTime"), state.getCurrentTime());
+        glUniform1f(glGetUniformLocation(textureProg, "deadTime"), state.getDeadTime());
         glUniform1i(glGetUniformLocation(textureProg, "enable"), state.getSwirlEnable());
         GLuint texId = 0;
         glActiveTexture(GL_TEXTURE0+texId);

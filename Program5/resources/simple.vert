@@ -34,9 +34,10 @@ vec4 justColor()
         }else{
             return vec4(0.588,0.313,0.176,1);
         }
-        //return vec4(colorIn*vec3(1, 0, 0), 1);
     }else if(type==3){
         return vec4(1, 1-timeElapsed, 1-timeElapsed, 1);
+    }else if(type==4){
+        return vec4(0.88,0.87,0.86,1);
     }else{
         return vec4(colorIn, 1);
     }
