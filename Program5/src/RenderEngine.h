@@ -47,7 +47,6 @@ public:
         
 		glm::vec3 dim = state.getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
-        printf("max: %f\n", maxDim);
 		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.001f, maxDim*100.0f);
         
         setupShader();
@@ -86,10 +85,6 @@ public:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xSize, ySize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //		glBindTexture(GL_TEXTURE_RECTANGLE, renderTexture);
-        //		glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, xSize, ySize, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        //		glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //		glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         
         //attach texture to framebuffer
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTexture, 0);
@@ -118,14 +113,14 @@ public:
         
 		glm::mat4 M = state.getCameraMatrix()*mR*mT;
 		glm::mat4 N = glm::inverseTranspose(mR*mT);
-        glm::vec4 lightPos = state.getLightPos();
+        glm::vec4 *lightPos = state.getLightPos();
         glm::vec4 camPos = state.getCameraPos();
         glm::mat4 L = state.getLightRotate();
-        
+    
         //printf("lightPos : %f-%f-%f\n",lightPos.a,lightPos.b,lightPos.g);
         //hacky light source size change
         GLfloat maxDis = state.getDimension()[2] * 3;
-        GLfloat distScale = 1.0f / (glm::length(L*lightPos - camPos) / maxDis);
+        GLfloat distScale = 1.0f / (glm::length(L*lightPos[0] - camPos) / maxDis);
         glPointSize(glm::mix(1.0f, 10.0f, distScale));
         
         //printf("cam %f %f %f\n", camPos[0], camPos[1], camPos[2]);
@@ -139,7 +134,7 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(lightProg, "M"), 1, GL_FALSE, &M[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(lightProg, "N"), 1, GL_FALSE, &N[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(lightProg, "L"), 1, GL_FALSE, &L[0][0]);
-        glUniform4fv(glGetUniformLocation(lightProg, "lightPos"), 1, &lightPos[0]);
+        glUniform4fv(glGetUniformLocation(lightProg, "lightPos"), 1, &lightPos[0][0]);
         glUniform4fv(glGetUniformLocation(lightProg, "camPos"), 1, &camPos[0]);
         glUniform1i(glGetUniformLocation(lightProg, "shadingMode"), state.getShadingMode());
         glBindVertexArray(lightArray);
@@ -152,7 +147,7 @@ public:
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
+        glUniform4fv(glGetUniformLocation(shaderProg, "camLook"), 1, &state.getCameraLook()[0]);
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "P"), 1, GL_FALSE, &P[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "C"), 1, GL_FALSE, &C[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "mR"), 1, GL_FALSE, &mR[0][0]);
@@ -160,10 +155,12 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "M"), 1, GL_FALSE, &M[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "N"), 1, GL_FALSE, &N[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shaderProg, "L"), 1, GL_FALSE, &L[0][0]);
-        glUniform4fv(glGetUniformLocation(shaderProg, "lightPos"), 1, &lightPos[0]);
+        glUniform4fv(glGetUniformLocation(shaderProg, "lightPos"), 1, &lightPos[0][0]);
+        glUniform4fv(glGetUniformLocation(shaderProg, "lightPos1"), 1, &lightPos[1][0]);
+        glUniform4fv(glGetUniformLocation(shaderProg, "lightPos2"), 1, &lightPos[2][0]);
         glUniform4fv(glGetUniformLocation(shaderProg, "camPos"), 1, &camPos[0]);
         glUniform1i(glGetUniformLocation(shaderProg, "shadingMode"), state.getShadingMode());
-        
+        glUniform1i(glGetUniformLocation(shaderProg, "discoMode"), state.getDiscoMode());
         for(int i=0; i<1; i++)
         {
             //TODO bind the texture object
@@ -243,7 +240,7 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(textureProg, "M"), 1, GL_FALSE, &M[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(textureProg, "N"), 1, GL_FALSE, &N[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(textureProg, "L"), 1, GL_FALSE, &L[0][0]);
-        glUniform4fv(glGetUniformLocation(textureProg, "lightPos"), 1, &lightPos[0]);
+        glUniform4fv(glGetUniformLocation(textureProg, "lightPos"), 1, &lightPos[0][0]);
         glUniform4fv(glGetUniformLocation(textureProg, "camPos"), 1, &camPos[0]);
         glUniform1i(glGetUniformLocation(textureProg, "shadingMode"), state.getShadingMode());
         glUniform2f(glGetUniformLocation(textureProg, "resolution"), state.currentRes[0], state.currentRes[1]);

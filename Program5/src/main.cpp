@@ -110,6 +110,9 @@ private:
         {
 			if (event.type == sf::Event::Closed)
 				state.setRunning(false);
+            
+            
+            
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
 				state.setRunning(false);
 
@@ -117,6 +120,10 @@ private:
                 state.toggleShadingMode();
             if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'x'))
                 state.toggleSwirlEnable();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'c'))
+                state.toggleLightRotate();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'v'))
+                state.toggleDiscoMode();
             
             if(event.type == sf::Event::MouseMoved)
             {

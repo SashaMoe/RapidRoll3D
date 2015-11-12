@@ -30,7 +30,7 @@ vec2 texCoord = fragCoord/res;
 
 vec4 swirl()
 {
-    float range = 100000.0;
+    float range = 1000000.0;
     
     vec2 toFrag = fragCoord;
     
@@ -39,7 +39,7 @@ vec4 swirl()
     
     float dis = length(toFrag-res/2);
 
-    float angle = 1.18;
+    float angle = 1.4;
 
     if(dis>range)
         return texture(texId, texCoord);
@@ -52,7 +52,7 @@ vec4 swirl()
     vec2 swlCoord = rot2 * rotZ * toFrag;
     
     
-    return texture(texId, swlCoord/res);
+    return texture(texId, swlCoord/res*3);
 }
 
 

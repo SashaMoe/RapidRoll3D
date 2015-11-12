@@ -9,11 +9,14 @@ uniform mat4 M;
 uniform mat4 N;
 uniform mat4 L;
 uniform vec4 lightPos;
+uniform vec4 lightPos1;
+uniform vec4 lightPos2;
 uniform vec4 camPos;
 uniform int shadingMode;
+uniform int discoMode;
 uniform int type;
 uniform float timeElapsed;
-
+uniform vec4 camLook;
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec2 texCoord;
 layout(location = 2) in vec3 colorIn;
@@ -45,7 +48,7 @@ void main()
     gl_Position = P*M*trans*pos;
     
     posFrag = pos;
-    normalFrag = colorIn;
+    normalFrag = colorIn* 2 -1;
     smoothColor = justColor();
     
     texMapping = texCoord;

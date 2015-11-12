@@ -46,7 +46,9 @@ private:
     glm::vec3 cameraPos;
     glm::vec3 cameraLook;
     glm::vec3 cameraUp;
-    glm::vec4 lightPos;
+    glm::vec4 *lightPos = new glm::vec4[3];
+    
+    
     glm::vec3 lightIntensity;
     glm::mat4 lightRotate;
     glm::mat4 lightIncrement;
@@ -68,6 +70,7 @@ private:
     bool modelRotating;
     bool shadingMode;
     bool swirlEnable;
+    bool discoEnable;
     
     bool figureDead;
     
@@ -125,7 +128,9 @@ public:
         cameraLook = glm::vec3(0,0,0);
         cameraUp = glm::vec3(0,1,0);
         
-        lightPos = glm::vec4(40,180,40,0);
+        lightPos[0] = glm::vec4(0,80,200,0);
+        lightPos[1] = glm::vec4(173,80,-100,0);
+        lightPos[2] = glm::vec4(-173,80,-100,0);
         
         lightIntensity = glm::vec3(1,1,1);
         lightRotate = glm::mat4(1);
@@ -139,7 +144,7 @@ public:
         lightRotating = false;
         
         modelRotating = false;
-        
+        discoEnable = false;
         swirlEnable = false;
         
         figureDead = false;
@@ -180,6 +185,10 @@ public:
     
     float getCurrentTime() const
     { return this->currentTime; }
+    
+    glm::vec4 getCameraLook(){
+        return glm::vec4(this->cameraLook,1);
+    }
     
     void timeStep(float t)
     {
@@ -225,6 +234,8 @@ public:
             resetFigure();
             figureDead = false;
         }
+        
+        printf("%f\n", figure.getLocation().y);
         
         this->currentTime = t;
     }
@@ -383,7 +394,7 @@ public:
     glm::mat4 getLightRotate() const
     { return lightRotate; }
     
-    glm::vec4 getLightPos() const
+    glm::vec4* getLightPos() const
     { return this->lightPos; }
     
     glm::vec3 getLightIntensity() const
@@ -395,8 +406,16 @@ public:
     void toggleShadingMode()
     { shadingMode = !shadingMode; }
     
+    void toggleDiscoMode()
+    { discoEnable = !discoEnable; }
+
+    
     int getShadingMode() const
     { return this->shadingMode; }
+    
+    int getDiscoMode() const
+    { return this->discoEnable; }
+    
     
     glm::vec4 getCameraPos() const
     { return glm::vec4(this->cameraPos, 1); }
