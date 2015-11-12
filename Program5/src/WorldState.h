@@ -447,6 +447,9 @@ public:
     int getSwirlEnable() const
     { return this->swirlEnable; }
     
+    int getPause() const
+    { return this->pause; }
+    
     float getDeadTime() const
     { return this->deadTime; }
     
