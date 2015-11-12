@@ -79,5 +79,4 @@ void main()
         fragColor = color;
     }
     
-    //fragColor = vec4(texMapping, 0.4, 1);
 }

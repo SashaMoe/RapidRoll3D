@@ -35,9 +35,6 @@ vec4 swirl()
     
     vec2 toFrag = fragCoord;
     
-    
-    
-    
     float dis = length(toFrag-res/2);
 
     float angle = 1.4;
@@ -51,7 +48,6 @@ vec4 swirl()
     mat2 rot2 = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
     vec2 swlCoord = rot2 * rotZ * toFrag;
-    
     
     return texture(texId, swlCoord/res*3);
 }
@@ -77,7 +73,6 @@ vec4 swirl2(float time)
     
     vec2 swlCoord = rot2 * rotZ * toFrag;
     
-    
     return texture(texId, swlCoord/res);
 }
 
@@ -87,7 +82,6 @@ void main()
 {
     
     fragColor = smoothColor;
-    //fragColor = vec4(texCoord, 1, 1);
     
     if(deadTime > 0){
         fragColor = swirl2(deadTime);
@@ -98,11 +92,5 @@ void main()
     else{
         fragColor = swirl();
     }
-    
-//    if (enable==0) {
-//
-//    }else{
-//        fragColor = swirl();
-//    }
     
 }
