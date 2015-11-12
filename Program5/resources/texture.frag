@@ -15,6 +15,7 @@ uniform vec2 resolution;
 uniform sampler2D texId;
 smooth in vec4 smoothColor;
 uniform float elapsedTime;
+uniform int enable;
 
 //out vec4 fragColor;
 layout(location = 0) out vec4 fragColor;
@@ -29,7 +30,7 @@ vec2 texCoord = fragCoord/res;
 
 vec4 swirl()
 {
-    float range = 80000.0;
+    float range = 100000.0;
     
     vec2 toFrag = fragCoord;
     
@@ -63,7 +64,10 @@ void main()
     fragColor = smoothColor;
     //fragColor = vec4(texCoord, 1, 1);
     
-    fragColor = texture(texId, texCoord);
-    //fragColor = swirl();
+    if (enable==0) {
+        fragColor = texture(texId, texCoord);
+    }else{
+        fragColor = swirl();
+    }
     
 }

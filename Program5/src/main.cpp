@@ -113,19 +113,10 @@ private:
 			if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
 				state.setRunning(false);
 
-			
-//            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
-//                state.setShadingMode(0);
-//            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'w'))
-//                state.setShadingMode(1);
-            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'e'))
-                state.setShadingMode(2);
-//			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'r'))
-//                state.toggleModelRotate();
-			if((event.type == sf::Event::TextEntered) && (event.text.unicode == 't'))
-                state.toggleLightRotate();
-            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'q'))
-                state.toggleFigureDrop();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'z'))
+                state.toggleShadingMode();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'x'))
+                state.toggleSwirlEnable();
             
             if(event.type == sf::Event::MouseMoved)
             {

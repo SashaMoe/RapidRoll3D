@@ -47,10 +47,12 @@ public:
         
 		glm::vec3 dim = state.getDimension();
 		float maxDim = std::max(dim[0], std::max(dim[1], dim[2]));
+        printf("max: %f\n", maxDim);
 		this->P = glm::perspective(1.0f, 1.0f, maxDim*0.001f, maxDim*100.0f);
         
         setupShader();
         setupTextures();
+        setupBuffersTexture();
         setupBuffersBluePlane(state.getBluePlaneModel());
         setupBuffersFigure(state.getFigureModel());
         setupBuffersPointedPlane(state.getPointedPlaneModel());
@@ -129,6 +131,21 @@ public:
         //printf("cam %f %f %f\n", camPos[0], camPos[1], camPos[2]);
         //printf("light %f %f %f\n", lightPos[0], lightPos[1], lightPos[2]);
 		
+        glUseProgram(lightProg);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "P"), 1, GL_FALSE, &P[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "C"), 1, GL_FALSE, &C[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mR"), 1, GL_FALSE, &mR[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "mT"), 1, GL_FALSE, &mT[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "M"), 1, GL_FALSE, &M[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "N"), 1, GL_FALSE, &N[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lightProg, "L"), 1, GL_FALSE, &L[0][0]);
+        glUniform4fv(glGetUniformLocation(lightProg, "lightPos"), 1, &lightPos[0]);
+        glUniform4fv(glGetUniformLocation(lightProg, "camPos"), 1, &camPos[0]);
+        glUniform1i(glGetUniformLocation(lightProg, "shadingMode"), state.getShadingMode());
+        glBindVertexArray(lightArray);
+        glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
+        
+        
 		//use shader
 		glUseProgram(shaderProg);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -159,50 +176,54 @@ public:
             //TODO bind the sampler to a texture unit
             glUniform1i(glGetUniformLocation(shaderProg, "texSampler"), texUnitId);
         }
-		
-        
-        
        
 		//draw figure
         glBindVertexArray(vertexArrayFigure);
         trans = state.getFigure().getTranslation();
         glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+        glUniform1i(glGetUniformLocation(shaderProg, "type"), 0);
         glDrawElements(GL_TRIANGLES, state.getFigureModel().getElements().size(), GL_UNSIGNED_INT, 0);
         checkGLError("model");
-        
-        
-        
         
         //draw blue plane
          glBindVertexArray(vertexArrayBluePlane);
         for(int i=0;i<8;i++){
-            trans = state.getPlanes()[i].getTranslation();
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+            if (state.getPlanes()[i].getLocation().y>-80) {
+                trans = state.getPlanes()[i].getTranslation();
+                glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+                glUniform1i(glGetUniformLocation(shaderProg, "type"), 1);
+                glDrawElements(GL_TRIANGLES, state.getBluePlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+            }
         }
-        
-        checkGLError("blueplane");
         
         //draw pointed plane
          glBindVertexArray(vertexArrayPointedPlane);
         for(int i=0;i<4;i++){
-            trans = state.getPointedPlanes()[i].getTranslation();
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glDrawElements(GL_TRIANGLES, state.getPointedPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+            if(state.getPointedPlanes()[i].getLocation().y>-80){
+                trans = state.getPointedPlanes()[i].getTranslation();
+                glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+                glUniform1i(glGetUniformLocation(shaderProg, "type"), 2);
+                glDrawElements(GL_TRIANGLES, state.getPointedPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+            }
         }
        
         //draw shatter plane
         glBindVertexArray(vertexArrayShatterPlane);
         for(int i=0;i<4;i++){
-            trans = state.getShatterPlanes()[i].getTranslation();
-            glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
-            glDrawElements(GL_TRIANGLES, state.getShatterPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+            if (state.getShatterPlanes()[i].getLocation().y>-80) {
+                trans = state.getShatterPlanes()[i].getTranslation();
+                glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+                glUniform1i(glGetUniformLocation(shaderProg, "type"), 3);
+                glUniform1f(glGetUniformLocation(shaderProg, "timeElapsed"), state.getShatterPlanes()[i].getTimeElapsed());
+                glDrawElements(GL_TRIANGLES, state.getShatterPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
+            }
         }
         
         //draw roof
         glBindVertexArray(vertexArrayRoof);
         trans = state.getRoof().getTranslation();
         glUniformMatrix4fv(glGetUniformLocation(shaderProg,"trans"),1,GL_FALSE,&trans[0][0]);
+        glUniform1i(glGetUniformLocation(shaderProg, "type"), 4);
         glDrawElements(GL_TRIANGLES, state.getPointedPlaneModel().getElements().size(), GL_UNSIGNED_INT, 0);
         
         
@@ -227,6 +248,7 @@ public:
         glUniform1i(glGetUniformLocation(textureProg, "shadingMode"), state.getShadingMode());
         glUniform2f(glGetUniformLocation(textureProg, "resolution"), state.currentRes[0], state.currentRes[1]);
         glUniform1f(glGetUniformLocation(textureProg, "elapsedTime"), state.getCurrentTime());
+        glUniform1i(glGetUniformLocation(textureProg, "enable"), state.getSwirlEnable());
         GLuint texId = 0;
         glActiveTexture(GL_TEXTURE0+texId);
         glBindTexture(GL_TEXTURE_2D, renderTexture);
@@ -351,6 +373,26 @@ private:
 	}
     
     
+    void setupBuffersTexture(){
+        static const GLfloat quadVertexData[] = {
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+        };
+        
+        glGenVertexArrays(1, &quadVertexArray);
+        glBindVertexArray(quadVertexArray);
+        GLuint quadVertexBuffer;
+        glGenBuffers(1, &quadVertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(glGetAttribLocation(textureProg, "pos"));
+        glVertexAttribPointer(glGetAttribLocation(textureProg, "pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    
     
     
     void setupBuffersFigure(ModelLoader & model){
@@ -386,27 +428,6 @@ private:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
         
-        
-        static const GLfloat quadVertexData[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
-        };
-        
-        glGenVertexArrays(1, &quadVertexArray);
-        glBindVertexArray(quadVertexArray);
-        GLuint quadVertexBuffer;
-        glGenBuffers(1, &quadVertexBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertexData), quadVertexData, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(glGetAttribLocation(textureProg, "pos"));
-        glVertexAttribPointer(glGetAttribLocation(textureProg, "pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-        
-        
     }
 
     
@@ -419,8 +440,10 @@ private:
         GLuint positionBuffer;
         GLuint colorBuffer;
         GLuint elementBuffer;
+        GLuint texCoordBuffer;
         GLint colorSlot;
         GLint positionSlot;
+        GLint texCoordSlot;
         
         //setup position buffer
         glGenBuffers(1, &positionBuffer);
@@ -429,6 +452,17 @@ private:
         positionSlot = glGetAttribLocation(shaderProg, "pos");
         glEnableVertexAttribArray(positionSlot);
         glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        glGenBuffers(1, &texCoordBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+        glBufferData(GL_ARRAY_BUFFER, model.getTexCoordBytes(), &model.getTexCoord()[0], GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        texCoordSlot = glGetAttribLocation(shaderProg, "texCoord");
+        glBindBuffer(GL_ARRAY_BUFFER, texCoordBuffer);
+        glEnableVertexAttribArray(texCoordSlot);
+        glVertexAttribPointer(texCoordSlot, 2, GL_FLOAT, GL_FALSE, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         
         // Do the same thing for the color data
@@ -568,60 +602,14 @@ private:
         glGenBuffers(1, &elementBuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
-    }
-    
-    
-    
-	void setupBuffers(Model & model)
-	{
-		glGenVertexArrays(1, &vertexArray);
-		glBindVertexArray(vertexArray);
-		
-		GLuint positionBuffer;
-		GLuint colorBuffer;
-		GLuint elementBuffer;
-        GLint colorSlot;
-        GLint positionSlot;
-		
-		//setup position buffer
-		glGenBuffers(1, &positionBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-		glBufferData(GL_ARRAY_BUFFER, model.getPositionBytes(), &model.getPosition()[0], GL_STATIC_DRAW);
-		positionSlot = glGetAttribLocation(shaderProg, "pos");
-		glEnableVertexAttribArray(positionSlot);
-		glVertexAttribPointer(positionSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		// Do the same thing for the color data
-		glGenBuffers(1, &colorBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-		glBufferData(GL_ARRAY_BUFFER, model.getColorBytes(), &model.getColor()[0], GL_STATIC_DRAW);
-		colorSlot =    glGetAttribLocation(shaderProg, "colorIn");
-		glEnableVertexAttribArray(colorSlot);
-		glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		
-		// now the elements
-		glGenBuffers(1, &elementBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, model.getElementBytes(), &model.getElements()[0], GL_STATIC_DRAW);
-		//leave the element buffer active
         
-		//hacky way to draw the light
+        
+        //hacky way to draw the light
         glGenVertexArrays(1, &lightArray);
         glBindVertexArray(lightArray);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-		glBindVertexArray(0);
-
-        
-        
-       
-        
-        
-        
-        
-		checkGLError("setup");
-	}
+        glBindVertexArray(0);
+    }
     
     void setupTextures()
     {

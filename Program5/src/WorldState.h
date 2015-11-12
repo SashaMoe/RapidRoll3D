@@ -37,8 +37,6 @@ private:
     ModelLoader pointedPlaneModel;
     ModelLoader shatterPlaneModel;
     
-    int shadingMode;
-    
     Figure figure = Figure();
     Plane *plane = new Plane[bluePlaneCount];
     PointedPlane *pointedPlane = new PointedPlane[pointedPlaneCount];
@@ -68,7 +66,9 @@ private:
     
     bool lightRotating;
     bool modelRotating;
-    bool figureDrop;
+    bool shadingMode;
+    bool swirlEnable;
+    
     bool figureDead;
     
     float dropV = 0;
@@ -90,7 +90,7 @@ public:
         running = true;
         
         figureModel.init("resources/sphere.obj");
-        bluePlaneModel.init("resources/BluePlaneUV.obj");
+        bluePlaneModel.init("resources/BluePlane.obj");
         pointedPlaneModel.init("resources/PointedPlane.obj");
         shatterPlaneModel.init("resources/ShatterPlane.obj");
         
@@ -125,7 +125,8 @@ public:
         cameraLook = glm::vec3(0,0,0);
         cameraUp = glm::vec3(0,1,0);
         
-        lightPos = glm::vec4((max-center)*1.3f, 1);
+        lightPos = glm::vec4(40,180,40,0);
+        
         lightIntensity = glm::vec3(1,1,1);
         lightRotate = glm::mat4(1);
         lightIncrement = glm::rotate(glm::mat4(1), -0.05f, glm::vec3(0,1,0));
@@ -139,7 +140,8 @@ public:
         
         modelRotating = false;
         
-        figureDrop = true;
+        swirlEnable = false;
+        
         figureDead = false;
         
         resetFigure();
@@ -194,14 +196,13 @@ public:
             modelRotate = modelIncrement * modelRotate;
         
         // figure drop
-        if (figureDrop) {
-            float t = std::max(elapsed, 0.0f);
-            if (checkFigureReachPlane(t)) {
-                // move with plane
-                moveFigure(upTrans);
-            }else{
-                dropFigure(t);
-            }
+        float tElapsed = std::max(elapsed, 0.0f);
+        if (checkFigureReachPlane(tElapsed)) {
+            // move with plane
+            moveFigure(upTrans);
+            dropV = 0;
+        }else{
+            dropFigure(tElapsed);
         }
         
         // plane time step
@@ -298,15 +299,22 @@ public:
         }
         
         for (int i=0; i<shatterPlaneCount; i++) {
-            ShatterPlane p = shatterPlane[i];
-            glm::vec4 planeBound = p.getBound();
-            float planeYMin = p.getLowY();
-            float planeYMax = p.getHighY();
+            ShatterPlane *p = shatterPlane+i;
+            glm::vec4 planeBound = p->getBound();
+            float planeYMin = p->getLowY();
+            float planeYMax = p->getHighY();
             
             if (!(figureBound.x>planeBound.y || figureBound.y<planeBound.x || figureBound.z>planeBound.w || figureBound.w<planeBound.z) && figureYMax>planeYMin) {
                 
                 if (figureYMin<planeYMax) {
                     stickToPlane(figure.getLowY(), planeYMax);
+                    float timeElapsed = p->getTimeElapsed();
+                    if(timeElapsed>1){
+                        p->translate(glm::translate(glm::mat4(1), glm::vec3(0,-4*size,0)));
+                        p->setTimeElapsed(0);
+                    }else{
+                        p->setTimeElapsed(timeElapsed+t);
+                    }
                     return true;
                 }
             }
@@ -319,7 +327,6 @@ public:
         if ((figureY-planeY)>0.01) {
             glm::mat4 trans = glm::translate(glm::mat4(1), glm::vec3(0,figureY-planeY,0));
             moveFigure(trans);
-            dropV = 0;
         }
     }
     
@@ -385,8 +392,8 @@ public:
     glm::mat4 getCameraMatrix() const
     { return glm::lookAt(cameraPos, cameraLook, cameraUp);; }
     
-    void setShadingMode(int m)
-    { this->shadingMode = m; }
+    void toggleShadingMode()
+    { shadingMode = !shadingMode; }
     
     int getShadingMode() const
     { return this->shadingMode; }
@@ -400,8 +407,11 @@ public:
     void toggleLightRotate()
     { lightRotating = !lightRotating; }
     
-    void toggleFigureDrop()
-    { figureDrop = !figureDrop; }
+    void toggleSwirlEnable()
+    { swirlEnable = !swirlEnable; }
+    
+    int getSwirlEnable() const
+    { return this->swirlEnable; }
     
     
     glm::mat4 getFigureTranslate(glm::mat4 trans){

@@ -10,6 +10,8 @@ uniform mat4 L;
 uniform vec4 lightPos;
 uniform vec4 camPos;
 uniform int shadingMode;
+uniform int type;
+uniform float timeElapsed;
 
 smooth in vec4 smoothColor;
 in vec4 posFrag;
@@ -20,7 +22,16 @@ out vec4 fragColor;
 
 void main()
 {
-    if (shadingMode!=0&&shadingMode!=1) {
+    vec4 color;
+    if(type==1){
+        color = texture(texSampler, texMapping);
+    }else if(type==3){
+        color = texture(texSampler, texMapping)*smoothColor;
+    }else{
+        color = smoothColor;
+    }
+    
+    if (shadingMode==1) {
         vec4 normal = normalize(mR*mT*trans*vec4(normalFrag,0));
         vec4 pos_transformed = normalize(mR*mT*trans*posFrag);
         vec4 light_vec = normalize(L*lightPos-pos_transformed);
@@ -32,13 +43,10 @@ void main()
         float specular = clamp(dot(r, v),0,1);
         
         vec4 Ia = vec4(vec3(0.1)*vec3(1),1);
-        vec4 Id = vec4(normalFrag, 1)*diffuse;
+        vec4 Id = color*diffuse;
         vec4 Is = vec4(1)*pow(specular,10);
         fragColor = Ia+Id+Is;
     }else{
-        fragColor = smoothColor;
+        fragColor = color;
     }
-    //fragColor = vec4(texMapping, 1, 1);
-    fragColor = texture(texSampler, texMapping);
-    fragColor = smoothColor;
 }

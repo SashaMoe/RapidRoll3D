@@ -7,6 +7,7 @@ private:
     glm::vec4 bound;
     float lowY;
     float highY;
+    float timeElapsed;
     
 public:
     ShatterPlane(){
@@ -27,6 +28,14 @@ public:
     
     glm::mat4 getTranslation(){
         return this->translation;
+    }
+    
+    float getTimeElapsed(){
+        return timeElapsed;
+    }
+    
+    void setTimeElapsed(float t){
+        timeElapsed = t;
     }
     
     void translate(glm::mat4 trans){
