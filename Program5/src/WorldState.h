@@ -94,9 +94,11 @@ public:
         running = true;
         
         figureModel.init("resources/sphere.obj", false);
-        bluePlaneModel.init("resources/BluePlaneUV.obj", true);
+        //bluePlaneModel.init("resources/BluePlaneUV.obj", true);
+        bluePlaneModel.init("resources/BluePlane.obj", false);
         pointedPlaneModel.init("resources/PointedPlane.obj", false);
-        shatterPlaneModel.init("resources/ShatterPlaneUV.obj", true);
+        //shatterPlaneModel.init("resources/ShatterPlaneUV.obj", true);
+        shatterPlaneModel.init("resources/ShatterPlane.obj", false);
         
         figure.init(figureModel.getBound(), figureModel.getHighestPoint().y, figureModel.getLowestPoint().y);
         

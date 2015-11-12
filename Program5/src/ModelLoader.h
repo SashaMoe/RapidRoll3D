@@ -58,6 +58,12 @@ public:
                 //printf("v%zu: %f %f %f\n", i, positions[i*3+0], positions[i*3+1], positions[i*3+2]);
             }
             
+            for(size_t i=0; i<loader.textureCount; i++) {
+                texCoords.push_back(loader.textureList[i]->e[0]);
+                texCoords.push_back(loader.textureList[i]->e[1]);
+                //printf("v%zu: %f %f\n", i, texCoords[i*2+0], texCoords[i*2+1]);
+            }
+            
             for(size_t i=0; i<loader.faceCount; i++) {
                 if(loader.faceList[i]->vertex_count != 3) {
                     fprintf(stderr, "Skipping non-triangle face %zu.\n", i);

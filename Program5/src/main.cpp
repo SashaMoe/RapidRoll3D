@@ -122,6 +122,8 @@ private:
                 state.toggleLightRotate();
             if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'v'))
                 state.toggleDiscoMode();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'p'))
+                state.togglePause();
             
             if(event.type == sf::Event::MouseMoved)
             {
