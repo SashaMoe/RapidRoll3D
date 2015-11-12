@@ -16,8 +16,8 @@ class WorldState
     
     
 private:
-    float speed = 0.5f;
-    float acceleration = 9.8f;
+    float speed = 0.6f;
+    float acceleration = 16.0f;
     float mouseSensitive = 0.01f;
     float moveUpV = 0.1f;
     int size = 40;
@@ -90,7 +90,6 @@ public:
         for(size_t i=0; i<NUM_TRACKED_FRAMES; i++)
             frameTimes[i] = 0.0f;
         
-        shadingMode = 0;
         running = true;
         
         figureModel.init("resources/sphere.obj", false);
@@ -141,12 +140,14 @@ public:
         
         modelTranslate = glm::translate(glm::mat4(1), -center);
         
-        mousePosX = 256;
-        mousePosY = 256;
+        mousePosX = 512;
+        mousePosY = 512;
+
         
-        lightRotating = false;
-        
+        shadingMode = 1;
+        lightRotating = true;
         modelRotating = false;
+        
         discoEnable = false;
         swirlEnable = false;
         pause = false;
@@ -309,7 +310,7 @@ public:
             float planeYMin = p.getLowY();
             float planeYMax = p.getHighY();
             
-            if (!(figureBound.x>planeBound.y || figureBound.y<planeBound.x || figureBound.z>planeBound.w || figureBound.w<planeBound.z) && figureYMax>planeYMin) {
+            if (!(figureBound.x>=planeBound.y || figureBound.y<=planeBound.x || figureBound.z>=planeBound.w || figureBound.w<=planeBound.z) && figureYMax>=planeYMin) {
                 
                 if (figureYMin<planeYMax) {
                     //stickToPlane(figure.getLowY(), planeYMax);
@@ -325,7 +326,7 @@ public:
             float planeYMin = p->getLowY();
             float planeYMax = p->getHighY();
             
-            if (!(figureBound.x>planeBound.y || figureBound.y<planeBound.x || figureBound.z>planeBound.w || figureBound.w<planeBound.z) && figureYMax>planeYMin) {
+            if (!(figureBound.x>=planeBound.y || figureBound.y<=planeBound.x || figureBound.z>=planeBound.w || figureBound.w<=planeBound.z) && figureYMax>=planeYMin) {
                 
                 if (figureYMin<planeYMax) {
                     stickToPlane(figure.getLowY(), planeYMax);
@@ -448,6 +449,18 @@ public:
     
     float getDeadTime() const
     { return this->deadTime; }
+    
+    void speedUp(){
+        speed = std::min(1.0f, speed+0.1f);
+        acceleration = std::min(20.0f, acceleration+1.0f);
+        moveUpV = std::min(0.9f, moveUpV+0.2f);
+    }
+    
+    void speedDown(){
+        speed = std::max(0.6f, speed-0.1f);
+        acceleration = std::max(16.0f, acceleration-1.0f);
+        moveUpV = std::max(0.1f, moveUpV-0.2f);
+    }
     
     
     glm::mat4 getFigureTranslate(glm::mat4 trans){
@@ -634,8 +647,8 @@ public:
         
         figure.translate(transBack*rotH*transToLook);
         
-        mousePosX = 256;
-        mousePosY = 256;
+        mousePosX = 512;
+        mousePosY = 512;
     }
 };
 

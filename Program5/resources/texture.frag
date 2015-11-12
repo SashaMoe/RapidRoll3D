@@ -31,7 +31,7 @@ vec2 texCoord = fragCoord/res;
 
 vec4 swirl()
 {
-    float range = 1000000.0;
+    float range = 100000.0;
     
     vec2 toFrag = fragCoord;
     
@@ -59,18 +59,18 @@ vec4 swirl()
 
 vec4 swirl2(float time)
 {
-    float range = 5000.0;
+    float range = 100000.0;
     
     vec2 toFrag = fragCoord;
     
     float dis = length(toFrag-res/2);
     
-    float angle = 0;
+    float angle = 1.4;
     
     if(dis>range)
         return texture(texId, texCoord);
     
-    float scale = ( pow(1- dis/range,sin(time)*600))*5;
+    float scale = ( pow(1- dis/range,sin(time*3.1415926/2)*800))*5;
     
     mat2 rotZ = mat2(cos(scale), sin(scale), -sin(scale), cos(scale));
     mat2 rot2 = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));

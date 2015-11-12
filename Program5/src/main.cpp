@@ -1,8 +1,8 @@
 
-#define printusers() printf("Program by David Caggiano + Tianjiao Mo\n");
+#define printusers() printf("Program by Team C\n");
 
 #define _CRT_SECURE_NO_WARNINGS
-#define RESOLUTION 1024
+#define RESOLUTION 1280
 #define TARGET_FPS 30                // controls spin update rate
 #define TIME_BETWEEN_UPDATES 0.015   // seconds between motion updates
 #define PRINT_FPS_INTERVAL 10.0f
@@ -124,12 +124,16 @@ private:
                 state.toggleDiscoMode();
             if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'p'))
                 state.togglePause();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'n'))
+                state.speedUp();
+            if((event.type == sf::Event::TextEntered) && (event.text.unicode == 'm'))
+                state.speedDown();
             
             if(event.type == sf::Event::MouseMoved)
             {
                 state.rotateCamera(event.mouseMove.x, event.mouseMove.y);
-                if (event.mouseMove.x!=256 || event.mouseMove.y!=256) {
-                    sf::Mouse::setPosition(sf::Vector2i(256,256), *App);
+                if (event.mouseMove.x!=512 || event.mouseMove.y!=512) {
+                    sf::Mouse::setPosition(sf::Vector2i(512,512), *App);
                 }
             }
 		}
