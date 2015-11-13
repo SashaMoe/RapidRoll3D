@@ -44,14 +44,6 @@
     <ClInclude Include="src\simplePNG.h" />
     <ClInclude Include="src\WorldState.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\lightPos.frag" />
-    <None Include="resources\lightPos.vert" />
-    <None Include="resources\simple.frag" />
-    <None Include="resources\simple.vert" />
-    <None Include="resources\texture.frag" />
-    <None Include="resources\texture.vert" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{456EBE0A-BEC3-40EB-8631-3C63995AADE5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

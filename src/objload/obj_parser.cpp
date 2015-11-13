@@ -309,6 +309,11 @@ int obj_parse_obj_file(obj_growable_scene_data *growable_data, const char *filen
 		fprintf(stderr, "Error reading file: %s\n", filename);
 		return 0;
 	}
+	
+	char const * lastSlash = filename;
+	while( NULL != strstr(lastSlash, "/"))
+		  lastSlash = strstr(lastSlash, "/")+1;
+	size_t slashPos = lastSlash - filename;
 
 /*		
 	extreme_dimensions[0].x = INFINITY; extreme_dimensions[0].y = INFINITY; extreme_dimensions[0].z = INFINITY;
@@ -408,7 +413,8 @@ int obj_parse_obj_file(obj_growable_scene_data *growable_data, const char *filen
 		
 		else if( strequal(current_token, "mtllib") ) // mtllib
 		{
-			strncpy(growable_data->material_filename, strtok(NULL, WHITESPACE), OBJ_FILENAME_LENGTH);
+			strncpy(growable_data->material_filename, filename, slashPos);
+			strncpy(growable_data->material_filename+slashPos, strtok(NULL, WHITESPACE), OBJ_FILENAME_LENGTH-slashPos);
 			obj_parse_mtl_file(growable_data->material_filename, &growable_data->material_list);
 			continue;
 		}

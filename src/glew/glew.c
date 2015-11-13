@@ -178,9 +178,9 @@ void* NSGLGetProcAddress (const GLubyte *name)
 #elif defined(__sgi) || defined(__sun) || defined(__HAIKU__)
 #  define glewGetProcAddress(name) dlGetProcAddress(name)
 #elif defined(__ANDROID__)
-#  define glewGetProcAddress(name) NULL /* fix */
+#  define glewGetProcAddress(name) NULL /* TODO */
 #elif defined(__native_client__)
-#  define glewGetProcAddress(name) NULL /* fix */
+#  define glewGetProcAddress(name) NULL /* TODO */
 #else /* __linux */
 #  define glewGetProcAddress(name) (*glXGetProcAddressARB)(name)
 #endif

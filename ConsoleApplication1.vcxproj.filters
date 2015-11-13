@@ -67,28 +67,5 @@
     <Filter Include="loader">
       <UniqueIdentifier>{700ccc1e-5830-481f-9d92-84dbf294ca96}</UniqueIdentifier>
     </Filter>
-    <Filter Include="resources">
-      <UniqueIdentifier>{3516204b-bf5b-4ea3-85a9-a51b08a6fe79}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="resources\lightPos.frag">
-      <Filter>resources</Filter>
-    </None>
-    <None Include="resources\lightPos.vert">
-      <Filter>resources</Filter>
-    </None>
-    <None Include="resources\simple.frag">
-      <Filter>resources</Filter>
-    </None>
-    <None Include="resources\simple.vert">
-      <Filter>resources</Filter>
-    </None>
-    <None Include="resources\texture.frag">
-      <Filter>resources</Filter>
-    </None>
-    <None Include="resources\texture.vert">
-      <Filter>resources</Filter>
-    </None>
   </ItemGroup>
 </Project>
